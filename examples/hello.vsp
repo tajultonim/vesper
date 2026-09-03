@@ -1,4 +1,6 @@
-let x = 10;
-let y = 20;
+let x = 100;
+let y = x + 20;
 
-print(x + y);
+print(x);
+print(y);
+print(x * y);
