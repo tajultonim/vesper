@@ -16,8 +16,6 @@ public:
     bool expect(TokenType type);
 
     std::unique_ptr<Expression> parsePrimary();
-    LetStatement parseLet();
-    BinaryExpression parseExpression();
 
 private:
     std::vector<Token> tokens;

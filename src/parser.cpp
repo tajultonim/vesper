@@ -105,17 +105,13 @@ BinaryExpression Parser::parseExpression()
 {
     BinaryExpression expression;
 
-    auto left = std::make_unique<IntegerExpression>();
-    left->value = std::stoi(current().value);
-    expression.left = std::move(left);
+    expression.left = std::stoi(current().value);
     expect(TokenType::INTEGER);
 
     expression.operatorType = current().type;
     expect(TokenType::PLUS);
 
-    auto right = std::make_unique<IntegerExpression>();
-    right->value = std::stoi(current().value);
-    expression.right = std::move(right);
+    expression.right = std::stoi(current().value);
     expect(TokenType::INTEGER);
 
     return expression;

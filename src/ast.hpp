@@ -3,11 +3,6 @@
 #include <string>
 #include <memory>
 
-struct Expression
-{
-    virtual ~Expression() = default;
-};
-
 struct LetStatement
 {
     std::string name;
@@ -19,6 +14,11 @@ struct BinaryExpression : Expression
     std::unique_ptr<Expression> left;
     std::unique_ptr<Expression> right;
     TokenType operatorType;
+};
+
+struct Expression
+{
+    virtual ~Expression() = default;
 };
 
 struct IntegerExpression : Expression
