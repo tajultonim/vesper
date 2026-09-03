@@ -1,134 +1,201 @@
 #include "parser.hpp"
 #include <iostream>
 
-Parser::Parser(const std::vector<Token> &input)
-    : tokens(input)
-{
-}
+Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
 
-LetStatement Parser::parseLet()
+std::unique_ptr<Statement> Parser::parseLet()
 {
-    LetStatement statement;
+    auto statement = std::make_unique<LetStatement>();
 
     expect(TokenType::LET);
 
-    statement.name = current().value;
+    statement->name = current().value;
     expect(TokenType::IDENTIFIER);
 
     expect(TokenType::EQUAL);
 
-    statement.value = std::stoi(current().value);
-    expect(TokenType::INTEGER);
+    statement->value = parseExpression();
 
     expect(TokenType::SEMICOLON);
 
     return statement;
 }
 
-Token Parser::current() const
-{
-    return tokens[position];
+Token Parser::current() const { return tokens[position]; }
+
+std::string tokenTypeName(TokenType type) {
+  switch (type) {
+  case TokenType::LET:
+    return "let";
+case TokenType::PRINT:
+    return "print";
+
+  case TokenType::INTEGER:
+    return "integer";
+
+  case TokenType::IDENTIFIER:
+    return "identifier";
+
+  case TokenType::PLUS:
+    return "+";
+
+  case TokenType::MINUS:
+    return "-";
+
+  case TokenType::STAR:
+    return "*";
+
+  case TokenType::SLASH:
+    return "/";
+
+  case TokenType::LPAREN:
+    return "(";
+
+  case TokenType::RPAREN:
+    return ")";
+
+  case TokenType::EQUAL:
+    return "=";
+
+  case TokenType::SEMICOLON:
+    return ";";
+
+  case TokenType::INVALID:
+    return "invalid";
+
+  case TokenType::END_OF_FILE:
+    return "end of file";
+  }
+
+  return "unknown";
 }
 
-std::string tokenTypeName(TokenType type)
-{
-    switch (type)
-    {
-        case TokenType::LET:
-            return "let";
-
-        case TokenType::INTEGER:
-            return "integer";
-
-        case TokenType::IDENTIFIER:
-            return "identifier";
-
-        case TokenType::PLUS:
-            return "+";
-
-        case TokenType::MINUS:
-            return "-";
-
-        case TokenType::STAR:
-            return "*";
-
-        case TokenType::SLASH:
-            return "/";
-
-        case TokenType::EQUAL:
-            return "=";
-
-        case TokenType::SEMICOLON:
-            return ";";
-
-        case TokenType::INVALID:
-            return "invalid";
-
-        case TokenType::END_OF_FILE:
-            return "end of file";
-    }
-
-    return "unknown";
+void Parser::advance() {
+  if (position < tokens.size()) {
+    position++;
+  }
 }
 
-void Parser::advance()
-{
-    if (position < tokens.size())
-    {
-        position++;
-    }
+bool Parser::expect(TokenType type) {
+  if (current().type != type) {
+    std::cerr << "Parser error at line " << current().line << ", column "
+              << current().column << ": expected " << tokenTypeName(type)
+              << ", got " << tokenTypeName(current().type) << '\n';
+
+    return false;
+  }
+
+  advance();
+  return true;
 }
 
-bool Parser::expect(TokenType type)
-{
-    if (current().type != type)
-    {
-        std::cerr << "Parser error at line "
-                  << current().line
-                  << ", column "
-                  << current().column
-                  << ": expected "
-                  << tokenTypeName(type)
-                  << ", got "
-                  << tokenTypeName(current().type)
-                  << '\n';
+std::unique_ptr<Expression> Parser::parseExpression() {
+  auto left = parseMultiplication();
 
-        return false;
-    }
-
+  while (current().type == TokenType::PLUS ||
+         current().type == TokenType::MINUS) {
+    TokenType op = current().type;
     advance();
-    return true;
+
+    auto right = parseMultiplication();
+
+    auto expression = std::make_unique<BinaryExpression>();
+
+    expression->left = std::move(left);
+    expression->right = std::move(right);
+    expression->operatorType = op;
+
+    left = std::move(expression);
+  }
+
+  return left;
 }
 
+std::unique_ptr<Expression> Parser::parsePrimary() {
+  if (current().type == TokenType::LPAREN) {
+    advance();
 
-BinaryExpression Parser::parseExpression()
-{
-    BinaryExpression expression;
+    auto expression = parseExpression();
 
-    expression.left = std::stoi(current().value);
-    expect(TokenType::INTEGER);
-
-    expression.operatorType = current().type;
-    expect(TokenType::PLUS);
-
-    expression.right = std::stoi(current().value);
-    expect(TokenType::INTEGER);
+    expect(TokenType::RPAREN);
 
     return expression;
+  }
+
+  if (current().type == TokenType::INTEGER) {
+    auto expression = std::make_unique<IntegerExpression>();
+    expression->value = std::stoi(current().value);
+    advance();
+    return expression;
+  }
+
+  if (current().type == TokenType::IDENTIFIER) {
+    auto expression = std::make_unique<IdentifierExpression>();
+    expression->name = current().value;
+    advance();
+    return expression;
+  }
+
+  return nullptr;
 }
 
-std::unique_ptr<Expression> Parser::parsePrimary()
+std::unique_ptr<Expression> Parser::parseMultiplication() {
+  auto left = parsePrimary();
+
+  while (current().type == TokenType::STAR ||
+         current().type == TokenType::SLASH) {
+    TokenType op = current().type;
+    advance();
+
+    auto right = parsePrimary();
+
+    auto expression = std::make_unique<BinaryExpression>();
+
+    expression->left = std::move(left);
+    expression->right = std::move(right);
+    expression->operatorType = op;
+
+    left = std::move(expression);
+  }
+
+  return left;
+}
+
+Program Parser::parseProgram()
 {
-    if (current().type == TokenType::INTEGER)
+    Program program;
+
+    while (current().type != TokenType::END_OF_FILE)
     {
-        auto expression = std::make_unique<IntegerExpression>();
-
-        expression->value = std::stoi(current().value);
-
-        advance();
-
-        return expression;
+        if (current().type == TokenType::LET)
+        {
+            program.statements.push_back(parseLet());
+        }
+        else if (current().type == TokenType::PRINT)
+        {
+            program.statements.push_back(parsePrint());
+        }
+        else
+        {
+            std::cerr << "Unexpected token\n";
+            break;
+        }
     }
 
-    return nullptr;
+    return program;
+}
+
+std::unique_ptr<Statement> Parser::parsePrint()
+{
+    auto statement = std::make_unique<PrintStatement>();
+
+    expect(TokenType::PRINT);
+    expect(TokenType::LPAREN);
+
+    statement->value = parseExpression();
+
+    expect(TokenType::RPAREN);
+    expect(TokenType::SEMICOLON);
+
+    return statement;
 }

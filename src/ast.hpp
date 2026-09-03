@@ -1,27 +1,45 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
-struct LetStatement
-{
-    std::string name;
-    int value;
+#include "token.hpp"
+
+struct Expression {
+  virtual ~Expression() = default;
 };
 
-struct BinaryExpression : Expression
-{
-    std::unique_ptr<Expression> left;
-    std::unique_ptr<Expression> right;
-    TokenType operatorType;
+struct IntegerExpression : Expression {
+  int value;
 };
 
-struct Expression
-{
-    virtual ~Expression() = default;
+struct BinaryExpression : Expression {
+  std::unique_ptr<Expression> left;
+  std::unique_ptr<Expression> right;
+  TokenType operatorType;
 };
 
-struct IntegerExpression : Expression
-{
-    int value;
+struct IdentifierExpression : Expression {
+  std::string name;
 };
+
+struct Statement {
+  virtual ~Statement() = default;
+};
+
+struct LetStatement : Statement {
+  std::string name;
+  std::unique_ptr<Expression> value;
+};
+
+struct PrintStatement : Statement {
+  std::unique_ptr<Expression> value;
+};
+
+struct Program
+{
+    std::vector<std::unique_ptr<Statement>> statements;
+};
+
+void printExpression(const Expression *expression, int indent = 0);

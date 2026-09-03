@@ -1,21 +1,24 @@
 #include <iostream>
+
+#include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 
-int main()
-{
-    std::string source = "10";
+int main() {
+  std::string source = "let x = 10;"
+                       "let y = x + 20;"
+                       "print(x);"
+                       "print(y);"
+                       "print(x * y);";
 
-    Lexer lexer(source);
-    std::vector<Token> tokens = lexer.tokenize();
+  Lexer lexer(source);
+  auto tokens = lexer.tokenize();
 
-    Parser parser(tokens);
+  Parser parser(tokens);
+  Program program = parser.parseProgram();
 
-    BinaryExpression expression = parser.parseExpression();
+  Interpreter interpreter;
+  interpreter.execute(program);
 
-    std::cout << "left: " << expression.left << '\n';
-    std::cout << "right: " << expression.right << '\n';
-    expression.operatorType == TokenType::PLUS ? std::cout << "operator: +" << '\n' : std::cout << "operator: -" << '\n';
-
-    return 0;
+  return 0;
 }
