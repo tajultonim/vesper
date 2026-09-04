@@ -25,12 +25,25 @@ void Lexer::advance() {
 Token Lexer::readNumber() {
   std::string c;
 
+  int startLine = line;
+  int startColumn = column;
+
   while (current() >= '0' && current() <= '9') {
     c += current();
     advance();
   }
+  if (current() == '.' && position + 1 < source.size() &&
+      source[position + 1] >= '0' && source[position + 1] <= '9') {
+    c += current();
+    advance();
 
-  return Token{TokenType::INTEGER_LITERAL, c, line, column};
+    while (current() >= '0' && current() <= '9') {
+      c += current();
+      advance();
+    }
+    return Token{TokenType::FLOAT_LITERAL, c, startLine, startColumn};
+  }
+  return Token{TokenType::INTEGER_LITERAL, c, startLine, startColumn};
 }
 
 void Lexer::skipWhitespace() {
@@ -156,7 +169,7 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::LET, c, startLine, startColumn};
   } else if (c == "mut") {
     return Token{TokenType::MUT, c, startLine, startColumn};
-  } else if (c == "int" || c == "bool") {
+  } else if (c == "int" || c == "bool" || c == "float") {
     return Token{TokenType::TYPE, c, startLine, startColumn};
   } else if (c == "print") {
     return Token{TokenType::PRINT, c, startLine, startColumn};

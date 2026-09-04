@@ -1,1 +1,2 @@
-/vesper.exe
+*.exe
+/build

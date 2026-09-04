@@ -1,2 +1,3 @@
-let x = 10;
-let y = x + true;
+let a = 42;
+let b = 3.14;
+let c = 100.25;

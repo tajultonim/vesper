@@ -51,6 +51,12 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
+    for (const auto &token : tokens) {
+      std::cout << "Token: " << token.value << " (Type: " << static_cast<int>(token.type)
+                << ", Line: " << token.line << ", Column: " << token.column
+                << ")\n";
+    }
+
     Parser parser(tokens);
 
     Program program = parser.parseProgram();
