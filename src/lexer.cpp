@@ -137,7 +137,10 @@ std::vector<Token> Lexer::tokenize() {
       }
     }
 
-    else if (c == ';') {
+    else if (c == ',') {
+      tokens.push_back(Token{TokenType::COMMA, ",", line, column});
+      advance();
+    } else if (c == ';') {
       tokens.push_back(Token{TokenType::SEMICOLON, ";", line, column});
       advance();
     } else if (c == ':') {
@@ -170,6 +173,12 @@ std::vector<Token> Lexer::tokenize() {
       advance();
     } else if (c == '}') {
       tokens.push_back(Token{TokenType::RBRACE, "}", line, column});
+      advance();
+    } else if (c == '[') {
+      tokens.push_back(Token{TokenType::LBRACKET, "[", line, column});
+      advance();
+    } else if (c == ']') {
+      tokens.push_back(Token{TokenType::RBRACKET, "]", line, column});
       advance();
     }
 

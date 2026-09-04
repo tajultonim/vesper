@@ -56,9 +56,15 @@ std::string tokenTypeName(TokenType type) {
     return "LBRACE";
   case TokenType::RBRACE:
     return "RBRACE";
+  case TokenType::LBRACKET:
+    return "LBRACKET";
+  case TokenType::RBRACKET:
+    return "RBRACKET";
 
   case TokenType::EQUAL:
     return "EQUAL";
+  case TokenType::COMMA:
+    return "COMMA";
   case TokenType::SEMICOLON:
     return "SEMICOLON";
   case TokenType::COLON:

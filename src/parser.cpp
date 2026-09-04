@@ -301,6 +301,26 @@ std::unique_ptr<Statement> Parser::parseWhileStatement() {
   return statement;
 }
 
+std::unique_ptr<Expression> Parser::parseArray() {
+  auto expression = std::make_unique<ArrayExpression>();
+
+  expect(TokenType::LBRACKET);
+
+  while (current().type != TokenType::RBRACKET) {
+    expression->elements.push_back(parseExpression());
+
+    if (current().type == TokenType::COMMA) {
+      advance();
+    } else if (current().type != TokenType::RBRACKET) {
+      throw std::runtime_error("Expected ',' or ']' in array literal");
+    }
+  }
+
+  expect(TokenType::RBRACKET);
+
+  return expression;
+}
+
 Program Parser::parseProgram() {
   Program program;
 

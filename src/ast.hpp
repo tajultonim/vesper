@@ -30,6 +30,10 @@ struct StringExpression : Expression {
   std::string value;
 };
 
+struct ArrayExpression : Expression {
+  std::vector<std::unique_ptr<Expression>> elements;
+};
+
 struct BinaryExpression : Expression {
   std::unique_ptr<Expression> left;
   std::unique_ptr<Expression> right;

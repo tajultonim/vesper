@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
 #include <iomanip>
 #include <iostream>
+#include <string>
 #include <vector>
 
 enum class TokenType {
@@ -28,6 +28,8 @@ enum class TokenType {
   RPAREN,
   LBRACE,
   RBRACE,
+  LBRACKET,
+  RBRACKET,
 
   EQUAL_EQUAL,
   NOT_EQUAL,
@@ -43,6 +45,7 @@ enum class TokenType {
   FOR,
 
   EQUAL,
+  COMMA,
   SEMICOLON,
   COLON,
   INVALID,
@@ -56,7 +59,6 @@ struct Token {
   int column;
 };
 
-
 std::string tokenTypeName(TokenType type);
-void printToken(const Token& token);
+void printToken(const Token &token);
 void printTokens(const std::vector<Token> &tokens);
