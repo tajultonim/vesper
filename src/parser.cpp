@@ -211,12 +211,66 @@ std::unique_ptr<Expression> Parser::parseMultiplication() {
   return left;
 }
 
+std::unique_ptr<Statement> Parser::parseStatement() {
+  switch (current().type) {
+  case TokenType::LET:
+  case TokenType::MUT:
+    return parseDeclaration();
+
+  case TokenType::PRINT:
+    return parsePrint();
+
+  case TokenType::IF:
+    return parseIfStatement();
+
+  case TokenType::IDENTIFIER:
+    return parseAssignment();
+
+  default:
+    throw std::runtime_error("Unexpected statement");
+  }
+}
+
+std::unique_ptr<Statement> Parser::parseIfStatement() {
+  auto statement = std::make_unique<IfStatement>();
+
+  expect(TokenType::IF);
+  expect(TokenType::LPAREN);
+
+  statement->condition = parseExpression();
+
+  expect(TokenType::RPAREN);
+  expect(TokenType::LBRACE);
+
+  while (current().type != TokenType::RBRACE) {
+    statement->thenBranch.push_back(parseStatement());
+  }
+
+  expect(TokenType::RBRACE);
+
+  if (current().type == TokenType::ELSE) {
+    advance();
+
+    expect(TokenType::LBRACE);
+
+    while (current().type != TokenType::RBRACE) {
+      statement->elseBranch.push_back(parseStatement());
+    }
+
+    expect(TokenType::RBRACE);
+  }
+
+  return statement;
+}
+
 Program Parser::parseProgram() {
   Program program;
 
   while (current().type != TokenType::END_OF_FILE) {
     if (current().type == TokenType::LET || current().type == TokenType::MUT) {
       program.statements.push_back(parseDeclaration());
+    } else if (current().type == TokenType::IF) {
+      program.statements.push_back(parseIfStatement());
     } else if (current().type == TokenType::IDENTIFIER) {
       program.statements.push_back(parseAssignment());
     } else if (current().type == TokenType::PRINT) {

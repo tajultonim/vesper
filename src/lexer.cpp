@@ -140,6 +140,12 @@ std::vector<Token> Lexer::tokenize() {
     } else if (c == ')') {
       tokens.push_back(Token{TokenType::RPAREN, ")", line, column});
       advance();
+    } else if (c == '{') {
+      tokens.push_back(Token{TokenType::LBRACE, "{", line, column});
+      advance();
+    } else if (c == '}') {
+      tokens.push_back(Token{TokenType::RBRACE, "}", line, column});
+      advance();
     }
 
     else {
@@ -186,4 +192,3 @@ Token Lexer::readIdentifier() {
 
   return Token{TokenType::IDENTIFIER, c, startLine, startColumn};
 }
-

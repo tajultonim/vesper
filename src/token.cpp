@@ -41,6 +41,10 @@ std::string tokenTypeName(TokenType type) {
     return "LPAREN";
   case TokenType::RPAREN:
     return "RPAREN";
+  case TokenType::LBRACE:
+    return "LBRACE";
+  case TokenType::RBRACE:
+    return "RBRACE";
 
   case TokenType::EQUAL:
     return "EQUAL";

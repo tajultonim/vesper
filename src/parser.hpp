@@ -24,7 +24,9 @@ public:
 
   std::unique_ptr<Statement> parseDeclaration();
   std::unique_ptr<Statement> parseAssignment();
+  std::unique_ptr<Statement> parseIfStatement();
   std::unique_ptr<Statement> parsePrint();
+  std::unique_ptr<Statement> parseStatement();
 
 private:
   std::vector<Token> tokens;

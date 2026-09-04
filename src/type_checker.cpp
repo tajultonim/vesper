@@ -141,6 +141,51 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
       VariableInfo{expressionType, declaration->mutable_};
 }
 
+void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
+  Type conditionType = checkExpression(ifStatement->condition.get());
+
+  if (conditionType != Type::BOOL) {
+    throw std::runtime_error(
+        "Type error: condition of 'if' statement must be a boolean");
+  }
+
+  for (const auto &statement : ifStatement->thenBranch) {
+    if (auto *declaration =
+            dynamic_cast<const VariableDeclaration *>(statement.get())) {
+      checkDeclaration(declaration);
+    } else if (auto *assignment =
+                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
+      checkAssignment(assignment);
+    } else if (auto *print =
+                   dynamic_cast<const PrintStatement *>(statement.get())) {
+      checkExpression(print->value.get());
+    } else if (auto *nestedIf =
+                   dynamic_cast<const IfStatement *>(statement.get())) {
+      checkIfStatement(nestedIf);
+    } else {
+      throw std::runtime_error("Unknown statement in 'then' branch");
+    }
+  }
+
+  for (const auto &statement : ifStatement->elseBranch) {
+    if (auto *declaration =
+            dynamic_cast<const VariableDeclaration *>(statement.get())) {
+      checkDeclaration(declaration);
+    } else if (auto *assignment =
+                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
+      checkAssignment(assignment);
+    } else if (auto *print =
+                   dynamic_cast<const PrintStatement *>(statement.get())) {
+      checkExpression(print->value.get());
+    } else if (auto *nestedIf =
+                   dynamic_cast<const IfStatement *>(statement.get())) {
+      checkIfStatement(nestedIf);
+    } else {
+      throw std::runtime_error("Unknown statement in 'else' branch");
+    }
+  }
+}
+
 void TypeChecker::checkProgram(const Program &program) {
   for (const auto &statement : program.statements) {
     if (auto *declaration =
@@ -152,7 +197,12 @@ void TypeChecker::checkProgram(const Program &program) {
     } else if (auto *print =
                    dynamic_cast<const PrintStatement *>(statement.get())) {
       checkExpression(print->value.get());
-    } else {
+    } else if (auto *ifStatement =
+                   dynamic_cast<const IfStatement *>(statement.get())) {
+      checkIfStatement(ifStatement);
+    }
+
+    else {
       throw std::runtime_error("Unknown statement");
     }
   }

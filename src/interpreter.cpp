@@ -4,6 +4,10 @@
 
 #include "interpreter.hpp"
 
+//*****************************************
+// Helper functions
+//*****************************************
+
 std::string valueTypeName(const Value &value) {
   if (std::holds_alternative<int>(value))
     return "int";
@@ -82,6 +86,10 @@ void requireNumericOperands(const Value &left, const Value &right,
                              " and " + valueTypeName(right));
   }
 }
+
+// *****************************************
+// Evaluate
+// *****************************************
 
 Value Interpreter::evaluate(const Expression *expression) {
   if (auto *integer = dynamic_cast<const IntegerExpression *>(expression)) {
@@ -183,33 +191,64 @@ Value Interpreter::evaluate(const Expression *expression) {
   throw std::runtime_error("RUNTIME ERROR: Unknown expression");
 }
 
+//*****************************************
+// Execute statement
+//*****************************************
+void Interpreter::executeStatement(const Statement *statement) {
+
+  if (auto *declaration =
+          dynamic_cast<const VariableDeclaration *>(statement)) {
+    Value value = evaluate(declaration->value.get());
+
+    environment.define(declaration->name,
+                       Variable{value, declaration->mutable_});
+  } else if (auto *assignment =
+                 dynamic_cast<const AssignmentStatement *>(statement)) {
+    Value value = evaluate(assignment->value.get());
+
+    environment.assign(assignment->name, Variable{value, true},
+                       assignment->value->line, assignment->value->column);
+  } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
+    Value conditionValue = evaluate(ifStatement->condition.get());
+
+    if (!std::holds_alternative<bool>(conditionValue)) {
+      throw std::runtime_error(
+          "Type error: condition of 'if' statement must be a boolean");
+    }
+
+    if (std::get<bool>(conditionValue)) {
+      for (const auto &thenStatement : ifStatement->thenBranch) {
+        executeStatement(thenStatement.get());
+      }
+    } else {
+      for (const auto &elseStatement : ifStatement->elseBranch) {
+        executeStatement(elseStatement.get());
+      }
+    }
+  } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
+    Value value = evaluate(print->value.get());
+
+    std::visit(
+        [](auto &&value) {
+          using T = std::decay_t<decltype(value)>;
+
+          if constexpr (std::is_same_v<T, bool>)
+            std::cout << (value ? "true" : "false") << '\n';
+          else
+            std::cout << value << '\n';
+        },
+        value);
+  } else {
+    throw std::runtime_error("RUNTIME_ERROR: Unknown statement");
+  }
+}
+
+// *****************************************
+// Execute
+// *****************************************
+
 void Interpreter::execute(const Program &program) {
   for (const auto &statement : program.statements) {
-    if (auto *declaration =
-            dynamic_cast<const VariableDeclaration *>(statement.get())) {
-      Value value = evaluate(declaration->value.get());
-      environment.define(declaration->name,
-                         Variable{value, declaration->mutable_});
-    } else if (auto *assignment =
-                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
-      Value value = evaluate(assignment->value.get());
-      environment.assign(assignment->name, Variable{value, true},
-                         assignment->value->line, assignment->value->column);
-    }
-
-    else if (auto *print =
-                 dynamic_cast<const PrintStatement *>(statement.get())) {
-      Value value = evaluate(print->value.get());
-      std::visit(
-          [](auto &&value) {
-            using T = std::decay_t<decltype(value)>;
-
-            if constexpr (std::is_same_v<T, bool>)
-              std::cout << (value ? "true" : "false") << '\n';
-            else
-              std::cout << value << '\n';
-          },
-          value);
-    }
+    executeStatement(statement.get());
   }
 }

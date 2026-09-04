@@ -25,6 +25,8 @@ enum class TokenType {
 
   LPAREN,
   RPAREN,
+  LBRACE,
+  RBRACE,
 
   EQUAL_EQUAL,
   NOT_EQUAL,
