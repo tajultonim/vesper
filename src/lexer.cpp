@@ -1,4 +1,5 @@
 #include "lexer.hpp"
+#include "parser.hpp"
 
 Lexer::Lexer(const std::string &input) : source(input) {}
 
@@ -169,6 +170,10 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::LET, c, startLine, startColumn};
   } else if (c == "mut") {
     return Token{TokenType::MUT, c, startLine, startColumn};
+  } else if (c == "if") {
+    return Token{TokenType::IF, c, startLine, startColumn};
+  } else if (c == "else") {
+    return Token{TokenType::ELSE, c, startLine, startColumn};
   } else if (c == "int" || c == "bool" || c == "float") {
     return Token{TokenType::TYPE, c, startLine, startColumn};
   } else if (c == "print") {
@@ -181,3 +186,4 @@ Token Lexer::readIdentifier() {
 
   return Token{TokenType::IDENTIFIER, c, startLine, startColumn};
 }
+

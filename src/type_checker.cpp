@@ -43,18 +43,30 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     switch (binary->operatorType) {
     case TokenType::PLUS:
       requireNumericOperands(left, right, "+");
+      if (left == Type::FLOAT || right == Type::FLOAT)
+        return Type::FLOAT;
+
       return Type::INT;
 
     case TokenType::MINUS:
       requireNumericOperands(left, right, "-");
+      if (left == Type::FLOAT || right == Type::FLOAT)
+        return Type::FLOAT;
+
       return Type::INT;
 
     case TokenType::STAR:
       requireNumericOperands(left, right, "*");
+      if (left == Type::FLOAT || right == Type::FLOAT)
+        return Type::FLOAT;
+
       return Type::INT;
 
     case TokenType::SLASH:
       requireNumericOperands(left, right, "/");
+      if (left == Type::FLOAT || right == Type::FLOAT)
+        return Type::FLOAT;
+
       return Type::INT;
 
     case TokenType::LESS:

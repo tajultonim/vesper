@@ -5,7 +5,6 @@
 #include "token.hpp"
 #include <vector>
 
-
 class Parser {
 
 public:
@@ -31,3 +30,5 @@ private:
   std::vector<Token> tokens;
   std::size_t position = 0;
 };
+
+std::string tokenTypeName(TokenType type);

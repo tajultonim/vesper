@@ -13,7 +13,6 @@ public:
   char current() const;
   void advance();
   std::vector<Token> tokenize();
-
 private:
   std::string source;
   std::size_t position = 0;

@@ -8,6 +8,7 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "type_checker.hpp"
+#include "token.hpp"
 
 int main(int argc, char *argv[]) {
   try {
@@ -51,11 +52,7 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
-    for (const auto &token : tokens) {
-      std::cout << "Token: " << token.value << " (Type: " << static_cast<int>(token.type)
-                << ", Line: " << token.line << ", Column: " << token.column
-                << ")\n";
-    }
+    printTokens(tokens);
 
     Parser parser(tokens);
 

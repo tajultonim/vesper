@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <iomanip>
+#include <iostream>
+#include <vector>
 
 enum class TokenType {
   LET,
@@ -30,6 +33,9 @@ enum class TokenType {
   GREATER,
   GREATER_EQUAL,
 
+  IF,
+  ELSE,
+
   EQUAL,
   SEMICOLON,
   COLON,
@@ -43,3 +49,8 @@ struct Token {
   int line;
   int column;
 };
+
+
+std::string tokenTypeName(TokenType type);
+void printToken(const Token& token);
+void printTokens(const std::vector<Token> &tokens);

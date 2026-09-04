@@ -13,6 +13,7 @@ add_executable(vesper
     src/environment.cpp
     src/interpreter.cpp
     src/type_checker.cpp
+    src/token.cpp
 )
 
 enable_testing()

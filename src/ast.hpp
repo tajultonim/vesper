@@ -56,6 +56,12 @@ struct PrintStatement : Statement {
   std::unique_ptr<Expression> value;
 };
 
+struct IfStatement : Statement {
+  std::unique_ptr<Expression> condition;
+  std::vector<std::unique_ptr<Statement>> thenBranch;
+  std::vector<std::unique_ptr<Statement>> elseBranch;
+};
+
 struct Program {
   std::vector<std::unique_ptr<Statement>> statements;
 };

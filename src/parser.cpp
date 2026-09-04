@@ -1,76 +1,10 @@
 #include "parser.hpp"
+#include "token.hpp"
 #include <iostream>
 
 Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
 
 Token Parser::current() const { return tokens[position]; }
-
-std::string tokenTypeName(TokenType type) {
-  switch (type) {
-
-  case TokenType::LET:
-    return "let";
-  case TokenType::MUT:
-    return "mut";
-  case TokenType::PRINT:
-    return "print";
-
-  case TokenType::TYPE:
-    return "type";
-  case TokenType::INTEGER_LITERAL:
-    return "int";
-  case TokenType::FLOAT_LITERAL:
-    return "float";
-  case TokenType::TRUE:
-    return "true";
-  case TokenType::FALSE:
-    return "false";
-
-  case TokenType::IDENTIFIER:
-    return "identifier";
-
-  case TokenType::PLUS:
-    return "+";
-  case TokenType::MINUS:
-    return "-";
-  case TokenType::STAR:
-    return "*";
-  case TokenType::SLASH:
-    return "/";
-
-  case TokenType::LPAREN:
-    return "(";
-  case TokenType::RPAREN:
-    return ")";
-
-  case TokenType::EQUAL:
-    return "=";
-  case TokenType::SEMICOLON:
-    return ";";
-  case TokenType::COLON:
-    return ":";
-
-  case TokenType::INVALID:
-    return "invalid";
-  case TokenType::END_OF_FILE:
-    return "end of file";
-
-  case TokenType::EQUAL_EQUAL:
-    return "==";
-  case TokenType::NOT_EQUAL:
-    return "!=";
-  case TokenType::LESS:
-    return "<";
-  case TokenType::LESS_EQUAL:
-    return "<=";
-  case TokenType::GREATER:
-    return ">";
-  case TokenType::GREATER_EQUAL:
-    return ">=";
-  }
-
-  return "unknown";
-}
 
 void Parser::advance() {
   if (position < tokens.size()) {
