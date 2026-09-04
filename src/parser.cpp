@@ -3,22 +3,21 @@
 
 Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
 
-std::unique_ptr<Statement> Parser::parseLet()
-{
-    auto statement = std::make_unique<LetStatement>();
+std::unique_ptr<Statement> Parser::parseLet() {
+  auto statement = std::make_unique<LetStatement>();
 
-    expect(TokenType::LET);
+  expect(TokenType::LET);
 
-    statement->name = current().value;
-    expect(TokenType::IDENTIFIER);
+  statement->name = current().value;
+  expect(TokenType::IDENTIFIER);
 
-    expect(TokenType::EQUAL);
+  expect(TokenType::EQUAL);
 
-    statement->value = parseExpression();
+  statement->value = parseExpression();
 
-    expect(TokenType::SEMICOLON);
+  expect(TokenType::SEMICOLON);
 
-    return statement;
+  return statement;
 }
 
 Token Parser::current() const { return tokens[position]; }
@@ -27,7 +26,7 @@ std::string tokenTypeName(TokenType type) {
   switch (type) {
   case TokenType::LET:
     return "let";
-case TokenType::PRINT:
+  case TokenType::PRINT:
     return "print";
 
   case TokenType::INTEGER:
@@ -65,6 +64,25 @@ case TokenType::PRINT:
 
   case TokenType::END_OF_FILE:
     return "end of file";
+
+  case TokenType::TRUE:
+    return "true";
+
+  case TokenType::FALSE:
+    return "false";
+
+  case TokenType::EQUAL_EQUAL:
+    return "==";
+  case TokenType::NOT_EQUAL:
+    return "!=";
+  case TokenType::LESS:
+    return "<";
+  case TokenType::LESS_EQUAL:
+    return "<=";
+  case TokenType::GREATER:
+    return ">";
+  case TokenType::GREATER_EQUAL:
+    return ">=";
   }
 
   return "unknown";
@@ -90,6 +108,10 @@ bool Parser::expect(TokenType type) {
 }
 
 std::unique_ptr<Expression> Parser::parseExpression() {
+  return parseAddition();
+}
+
+std::unique_ptr<Expression> Parser::parseAddition() {
   auto left = parseMultiplication();
 
   while (current().type == TokenType::PLUS ||
@@ -125,6 +147,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
   if (current().type == TokenType::INTEGER) {
     auto expression = std::make_unique<IntegerExpression>();
     expression->value = std::stoi(current().value);
+
     advance();
     return expression;
   }
@@ -132,6 +155,8 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
   if (current().type == TokenType::IDENTIFIER) {
     auto expression = std::make_unique<IdentifierExpression>();
     expression->name = current().value;
+    expression->line = current().line;
+    expression->column = current().column;
     advance();
     return expression;
   }
@@ -161,41 +186,33 @@ std::unique_ptr<Expression> Parser::parseMultiplication() {
   return left;
 }
 
-Program Parser::parseProgram()
-{
-    Program program;
+Program Parser::parseProgram() {
+  Program program;
 
-    while (current().type != TokenType::END_OF_FILE)
-    {
-        if (current().type == TokenType::LET)
-        {
-            program.statements.push_back(parseLet());
-        }
-        else if (current().type == TokenType::PRINT)
-        {
-            program.statements.push_back(parsePrint());
-        }
-        else
-        {
-            std::cerr << "Unexpected token\n";
-            break;
-        }
+  while (current().type != TokenType::END_OF_FILE) {
+    if (current().type == TokenType::LET) {
+      program.statements.push_back(parseLet());
+    } else if (current().type == TokenType::PRINT) {
+      program.statements.push_back(parsePrint());
+    } else {
+      std::cerr << "Unexpected token\n";
+      break;
     }
+  }
 
-    return program;
+  return program;
 }
 
-std::unique_ptr<Statement> Parser::parsePrint()
-{
-    auto statement = std::make_unique<PrintStatement>();
+std::unique_ptr<Statement> Parser::parsePrint() {
+  auto statement = std::make_unique<PrintStatement>();
 
-    expect(TokenType::PRINT);
-    expect(TokenType::LPAREN);
+  expect(TokenType::PRINT);
+  expect(TokenType::LPAREN);
 
-    statement->value = parseExpression();
+  statement->value = parseExpression();
 
-    expect(TokenType::RPAREN);
-    expect(TokenType::SEMICOLON);
+  expect(TokenType::RPAREN);
+  expect(TokenType::SEMICOLON);
 
-    return statement;
+  return statement;
 }

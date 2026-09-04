@@ -7,6 +7,8 @@
 #include "token.hpp"
 
 struct Expression {
+  int line;
+  int column;
   virtual ~Expression() = default;
 };
 
@@ -37,9 +39,8 @@ struct PrintStatement : Statement {
   std::unique_ptr<Expression> value;
 };
 
-struct Program
-{
-    std::vector<std::unique_ptr<Statement>> statements;
+struct Program {
+  std::vector<std::unique_ptr<Statement>> statements;
 };
 
 void printExpression(const Expression *expression, int indent = 0);

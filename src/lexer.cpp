@@ -12,6 +12,12 @@ char Lexer::current() const {
 
 void Lexer::advance() {
   if (position < source.size()) {
+    if (current() == '\n') {
+      line++;
+      column = 1;
+    } else {
+      column++;
+    }
     position++;
   }
 }
@@ -24,7 +30,7 @@ Token Lexer::readNumber() {
     advance();
   }
 
-  return Token{TokenType::INTEGER, c, 1, static_cast<int>(position) + 1};
+  return Token{TokenType::INTEGER, c, line, column};
 }
 
 void Lexer::skipWhitespace() {
@@ -49,58 +55,92 @@ std::vector<Token> Lexer::tokenize() {
       tokens.push_back(readNumber());
     } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
       tokens.push_back(readIdentifier());
+    }
+
+    else if (c == '<') {
+      if (position + 1 < source.size() && source[position + 1] == '=') {
+        tokens.push_back(Token{TokenType::LESS_EQUAL, "<=", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(Token{TokenType::LESS, "<", line, column});
+        advance();
+      }
+    } else if (c == '>') {
+      if (position + 1 < source.size() && source[position + 1] == '=') {
+        tokens.push_back(Token{TokenType::GREATER_EQUAL, ">=", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(Token{TokenType::GREATER, ">", line, column});
+        advance();
+      }
+    }
+
+    else if (c == '!') {
+      if (position + 1 < source.size() && source[position + 1] == '=') {
+        tokens.push_back(Token{TokenType::NOT_EQUAL, "!=", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(
+            Token{TokenType::INVALID, std::string(1, c), line, column});
+        advance();
+      }
     } else if (c == '=') {
+      if (position + 1 < source.size() && source[position + 1] == '=') {
+        tokens.push_back(Token{TokenType::EQUAL_EQUAL, "==", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(Token{TokenType::EQUAL, "=", line, column});
+        advance();
+      }
+    }
 
-      tokens.push_back(
-          Token{TokenType::EQUAL, "=", 1, static_cast<int>(position) + 1});
-
-      advance();
-    } else if (c == ';') {
-      tokens.push_back(
-          Token{TokenType::SEMICOLON, ";", 1, static_cast<int>(position) + 1});
-
+    else if (c == ';') {
+      tokens.push_back(Token{TokenType::SEMICOLON, ";", line, column});
       advance();
     }
 
     else if (c == '+') {
-      tokens.push_back(
-          Token{TokenType::PLUS, "+", 1, static_cast<int>(position) + 1});
+      tokens.push_back(Token{TokenType::PLUS, "+", line, column});
       advance();
     } else if (c == '-') {
-      tokens.push_back(
-          Token{TokenType::MINUS, "-", 1, static_cast<int>(position) + 1});
+      tokens.push_back(Token{TokenType::MINUS, "-", line, column});
       advance();
     } else if (c == '*') {
-      tokens.push_back(
-          Token{TokenType::STAR, "*", 1, static_cast<int>(position) + 1});
+      tokens.push_back(Token{TokenType::STAR, "*", line, column});
       advance();
     } else if (c == '/') {
-      tokens.push_back(
-          Token{TokenType::SLASH, "/", 1, static_cast<int>(position) + 1});
+      tokens.push_back(Token{TokenType::SLASH, "/", line, column});
       advance();
-    } else if (c == '(') {
-      tokens.push_back(
-          Token{TokenType::LPAREN, "(", 1, static_cast<int>(position) + 1});
+    }
+
+    else if (c == '(') {
+      tokens.push_back(Token{TokenType::LPAREN, "(", line, column});
       advance();
     } else if (c == ')') {
-      tokens.push_back(
-          Token{TokenType::RPAREN, ")", 1, static_cast<int>(position) + 1});
+      tokens.push_back(Token{TokenType::RPAREN, ")", line, column});
       advance();
-    } else {
+    }
+
+    else {
       tokens.push_back(Token{TokenType::INVALID, std::string(1, c), 1,
                              static_cast<int>(position) + 1});
-
       advance();
     }
   }
-  tokens.push_back(
-      Token{TokenType::END_OF_FILE, "", 1, static_cast<int>(position) + 1});
+  tokens.push_back(Token{TokenType::END_OF_FILE, "", line, column});
 
   return tokens;
 }
 
 Token Lexer::readIdentifier() {
   std::string c;
+
+  const int startLine = line;
+  const int startColumn = column;
 
   while ((current() >= 'a' && current() <= 'z') ||
          (current() >= 'A' && current() <= 'Z') ||
@@ -110,10 +150,14 @@ Token Lexer::readIdentifier() {
   }
 
   if (c == "let") {
-    return Token{TokenType::LET, c, 1, static_cast<int>(position) + 1};
-  }else if (c == "print") {
-    return Token{TokenType::PRINT, c, 1, static_cast<int>(position) + 1};
+    return Token{TokenType::LET, c, startLine, startColumn};
+  } else if (c == "print") {
+    return Token{TokenType::PRINT, c, startLine, startColumn};
+  } else if (c == "true") {
+    return Token{TokenType::TRUE, c, startLine, startColumn};
+  } else if (c == "false") {
+    return Token{TokenType::FALSE, c, startLine, startColumn};
   }
 
-  return Token{TokenType::IDENTIFIER, c, 1, static_cast<int>(position) + 1};
+  return Token{TokenType::IDENTIFIER, c, startLine, startColumn};
 }

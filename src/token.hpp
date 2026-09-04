@@ -16,6 +16,15 @@ enum class TokenType {
   LPAREN,
   RPAREN,
 
+  TRUE,
+  FALSE,
+  EQUAL_EQUAL,
+  NOT_EQUAL,
+  LESS,
+  LESS_EQUAL,
+  GREATER,
+  GREATER_EQUAL,
+
   EQUAL,
   SEMICOLON,
   INVALID,

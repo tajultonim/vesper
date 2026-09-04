@@ -7,7 +7,7 @@ class Environment
 {
 public:
     void define(const std::string& name, int value);
-    int get(const std::string& name) const;
+    int get(const std::string& name, int line, int column) const;
 
 private:
     std::unordered_map<std::string, int> variables;
