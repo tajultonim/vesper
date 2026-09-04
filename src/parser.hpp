@@ -25,6 +25,7 @@ public:
   std::unique_ptr<Statement> parseDeclaration();
   std::unique_ptr<Statement> parseAssignment();
   std::unique_ptr<Statement> parseIfStatement();
+  std::unique_ptr<Statement> parseWhileStatement();
   std::unique_ptr<Statement> parsePrint();
   std::unique_ptr<Statement> parseStatement();
 

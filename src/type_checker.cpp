@@ -17,6 +17,10 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     return Type::INT;
   }
 
+  if (dynamic_cast<const StringExpression *>(expression)) {
+    return Type::STRING;
+  }
+
   if (dynamic_cast<const FloatExpression *>(expression)) {
     return Type::FLOAT;
   }
@@ -42,6 +46,9 @@ Type TypeChecker::checkExpression(const Expression *expression) {
 
     switch (binary->operatorType) {
     case TokenType::PLUS:
+      if (left == Type::STRING && right == Type::STRING) {
+        return Type::STRING;
+      }
       requireNumericOperands(left, right, "+");
       if (left == Type::FLOAT || right == Type::FLOAT)
         return Type::FLOAT;
@@ -56,6 +63,10 @@ Type TypeChecker::checkExpression(const Expression *expression) {
       return Type::INT;
 
     case TokenType::STAR:
+      if (left == Type::STRING && right == Type::INT) {
+        return Type::STRING;
+      }
+
       requireNumericOperands(left, right, "*");
       if (left == Type::FLOAT || right == Type::FLOAT)
         return Type::FLOAT;
@@ -141,6 +152,25 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
       VariableInfo{expressionType, declaration->mutable_};
 }
 
+void TypeChecker::checkStatement(const Statement *statement) {
+  if (auto *declaration =
+          dynamic_cast<const VariableDeclaration *>(statement)) {
+    checkDeclaration(declaration);
+  } else if (auto *assignment =
+                 dynamic_cast<const AssignmentStatement *>(statement)) {
+    checkAssignment(assignment);
+  } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
+    checkExpression(print->value.get());
+  } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
+    checkIfStatement(ifStatement);
+  } else if (auto *whileStatement =
+                 dynamic_cast<const WhileStatement *>(statement)) {
+    checkWhileStatement(whileStatement);
+  } else {
+    throw std::runtime_error("Unknown statement");
+  }
+}
+
 void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
   Type conditionType = checkExpression(ifStatement->condition.get());
 
@@ -150,60 +180,29 @@ void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
   }
 
   for (const auto &statement : ifStatement->thenBranch) {
-    if (auto *declaration =
-            dynamic_cast<const VariableDeclaration *>(statement.get())) {
-      checkDeclaration(declaration);
-    } else if (auto *assignment =
-                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
-      checkAssignment(assignment);
-    } else if (auto *print =
-                   dynamic_cast<const PrintStatement *>(statement.get())) {
-      checkExpression(print->value.get());
-    } else if (auto *nestedIf =
-                   dynamic_cast<const IfStatement *>(statement.get())) {
-      checkIfStatement(nestedIf);
-    } else {
-      throw std::runtime_error("Unknown statement in 'then' branch");
-    }
+    checkStatement(statement.get());
   }
 
   for (const auto &statement : ifStatement->elseBranch) {
-    if (auto *declaration =
-            dynamic_cast<const VariableDeclaration *>(statement.get())) {
-      checkDeclaration(declaration);
-    } else if (auto *assignment =
-                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
-      checkAssignment(assignment);
-    } else if (auto *print =
-                   dynamic_cast<const PrintStatement *>(statement.get())) {
-      checkExpression(print->value.get());
-    } else if (auto *nestedIf =
-                   dynamic_cast<const IfStatement *>(statement.get())) {
-      checkIfStatement(nestedIf);
-    } else {
-      throw std::runtime_error("Unknown statement in 'else' branch");
-    }
+    checkStatement(statement.get());
+  }
+}
+
+void TypeChecker::checkWhileStatement(const WhileStatement *whileStatement) {
+  Type conditionType = checkExpression(whileStatement->condition.get());
+
+  if (conditionType != Type::BOOL) {
+    throw std::runtime_error(
+        "Type error: condition of 'while' statement must be a boolean");
+  }
+
+  for (const auto &statement : whileStatement->body) {
+    checkStatement(statement.get());
   }
 }
 
 void TypeChecker::checkProgram(const Program &program) {
   for (const auto &statement : program.statements) {
-    if (auto *declaration =
-            dynamic_cast<const VariableDeclaration *>(statement.get())) {
-      checkDeclaration(declaration);
-    } else if (auto *assignment =
-                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
-      checkAssignment(assignment);
-    } else if (auto *print =
-                   dynamic_cast<const PrintStatement *>(statement.get())) {
-      checkExpression(print->value.get());
-    } else if (auto *ifStatement =
-                   dynamic_cast<const IfStatement *>(statement.get())) {
-      checkIfStatement(ifStatement);
-    }
-
-    else {
-      throw std::runtime_error("Unknown statement");
-    }
+    checkStatement(statement.get());
   }
 }

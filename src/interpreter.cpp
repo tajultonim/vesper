@@ -18,6 +18,9 @@ std::string valueTypeName(const Value &value) {
   if (std::holds_alternative<double>(value))
     return "float";
 
+  if (std::holds_alternative<std::string>(value))
+    return "string";
+
   return "Unknown";
 }
 
@@ -81,7 +84,7 @@ void requireNumericOperands(const Value &left, const Value &right,
 
   if (valueTypeName(left) != "float" && valueTypeName(left) != "int" ||
       valueTypeName(right) != "float" && valueTypeName(right) != "int") {
-    throw std::runtime_error("Type error: operator '" + operatorSymbol +
+    throw std::runtime_error("RUNTIME_ERROR: operator '" + operatorSymbol +
                              "' cannot be applied to " + valueTypeName(left) +
                              " and " + valueTypeName(right));
   }
@@ -109,6 +112,10 @@ Value Interpreter::evaluate(const Expression *expression) {
 
     switch (binary->operatorType) {
     case TokenType::PLUS: {
+
+      if (valueTypeName(left) == "string" && valueTypeName(right) == "string") {
+        return std::get<std::string>(left) + std::get<std::string>(right);
+      }
       requireNumericOperands(left, right, "+");
       if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
         return performFloatArithmeticOperation(left, right, TokenType::PLUS);
@@ -124,6 +131,15 @@ Value Interpreter::evaluate(const Expression *expression) {
     }
 
     case TokenType::STAR: {
+
+      if (valueTypeName(left) == "string" && valueTypeName(right) == "int") {
+        std::string result;
+        for (int i = 0; i < std::get<int>(right); ++i) {
+          result += std::get<std::string>(left);
+        }
+        return result;
+      }
+
       requireNumericOperands(left, right, "*");
       if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
         return performFloatArithmeticOperation(left, right, TokenType::STAR);
@@ -188,6 +204,10 @@ Value Interpreter::evaluate(const Expression *expression) {
     return boolean->value;
   }
 
+  if (auto *string = dynamic_cast<const StringExpression *>(expression)) {
+    return string->value;
+  }
+
   throw std::runtime_error("RUNTIME ERROR: Unknown expression");
 }
 
@@ -225,6 +245,26 @@ void Interpreter::executeStatement(const Statement *statement) {
         executeStatement(elseStatement.get());
       }
     }
+
+  } else if (auto *whileStatement =
+                 dynamic_cast<const WhileStatement *>(statement)) {
+    while (true) {
+      Value conditionValue = evaluate(whileStatement->condition.get());
+
+      if (!std::holds_alternative<bool>(conditionValue)) {
+        throw std::runtime_error(
+            "Type error: condition of 'while' statement must be a boolean");
+      }
+
+      if (!std::get<bool>(conditionValue)) {
+        break;
+      }
+
+      for (const auto &bodyStatement : whileStatement->body) {
+        executeStatement(bodyStatement.get());
+      }
+    }
+
   } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
     Value value = evaluate(print->value.get());
 

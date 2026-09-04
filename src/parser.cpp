@@ -39,6 +39,10 @@ Type Parser::parseType() {
     return Type::BOOL;
   }
 
+  if (token.value == "string") {
+    return Type::STRING;
+  }
+
   throw std::runtime_error("Unknown type '" + token.value + "'");
 }
 
@@ -141,7 +145,39 @@ std::unique_ptr<Expression> Parser::parseAddition() {
   return left;
 }
 
+std::unique_ptr<Expression> Parser::parseMultiplication() {
+  auto left = parsePrimary();
+
+  while (current().type == TokenType::STAR ||
+         current().type == TokenType::SLASH) {
+    TokenType op = current().type;
+    advance();
+
+    auto right = parsePrimary();
+
+    auto expression = std::make_unique<BinaryExpression>();
+
+    expression->left = std::move(left);
+    expression->right = std::move(right);
+    expression->operatorType = op;
+
+    left = std::move(expression);
+  }
+
+  return left;
+}
+
 std::unique_ptr<Expression> Parser::parsePrimary() {
+
+  if (current().type == TokenType::STRING_LITERAL) {
+    auto expression = std::make_unique<StringExpression>();
+    expression->value = current().value;
+    expression->line = current().line;
+    expression->column = current().column;
+    advance();
+    return expression;
+  }
+
   if (current().type == TokenType::LPAREN) {
     advance();
 
@@ -187,28 +223,6 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
   }
 
   return nullptr;
-}
-
-std::unique_ptr<Expression> Parser::parseMultiplication() {
-  auto left = parsePrimary();
-
-  while (current().type == TokenType::STAR ||
-         current().type == TokenType::SLASH) {
-    TokenType op = current().type;
-    advance();
-
-    auto right = parsePrimary();
-
-    auto expression = std::make_unique<BinaryExpression>();
-
-    expression->left = std::move(left);
-    expression->right = std::move(right);
-    expression->operatorType = op;
-
-    left = std::move(expression);
-  }
-
-  return left;
 }
 
 std::unique_ptr<Statement> Parser::parseStatement() {
@@ -267,6 +281,26 @@ std::unique_ptr<Statement> Parser::parseIfStatement() {
   return statement;
 }
 
+std::unique_ptr<Statement> Parser::parseWhileStatement() {
+  auto statement = std::make_unique<WhileStatement>();
+
+  expect(TokenType::WHILE);
+  expect(TokenType::LPAREN);
+
+  statement->condition = parseExpression();
+
+  expect(TokenType::RPAREN);
+  expect(TokenType::LBRACE);
+
+  while (current().type != TokenType::RBRACE) {
+    statement->body.push_back(parseStatement());
+  }
+
+  expect(TokenType::RBRACE);
+
+  return statement;
+}
+
 Program Parser::parseProgram() {
   Program program;
 
@@ -275,6 +309,8 @@ Program Parser::parseProgram() {
       program.statements.push_back(parseDeclaration());
     } else if (current().type == TokenType::IF) {
       program.statements.push_back(parseIfStatement());
+    } else if (current().type == TokenType::WHILE) {
+      program.statements.push_back(parseWhileStatement());
     } else if (current().type == TokenType::IDENTIFIER) {
       program.statements.push_back(parseAssignment());
     } else if (current().type == TokenType::PRINT) {

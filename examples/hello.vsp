@@ -1,4 +1,6 @@
 
-while(true){
-    print(1)
+mut x=0;
+while(x<100){
+print("*"*x);
+x=x+1;
 }

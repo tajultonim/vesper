@@ -26,6 +26,10 @@ struct BooleanExpression : Expression {
   bool value;
 };
 
+struct StringExpression : Expression {
+  std::string value;
+};
+
 struct BinaryExpression : Expression {
   std::unique_ptr<Expression> left;
   std::unique_ptr<Expression> right;
@@ -60,6 +64,11 @@ struct IfStatement : Statement {
   std::unique_ptr<Expression> condition;
   std::vector<std::unique_ptr<Statement>> thenBranch;
   std::vector<std::unique_ptr<Statement>> elseBranch;
+};
+
+struct WhileStatement : Statement {
+  std::unique_ptr<Expression> condition;
+  std::vector<std::unique_ptr<Statement>> body;
 };
 
 struct Program {

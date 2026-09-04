@@ -29,6 +29,8 @@ std::string tokenTypeName(TokenType type) {
     return "INTEGER_LITERAL";
   case TokenType::FLOAT_LITERAL:
     return "FLOAT_LITERAL";
+  case TokenType::STRING_LITERAL:
+    return "STRING_LITERAL";
   case TokenType::TRUE:
     return "TRUE";
   case TokenType::FALSE:

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <variant>
+#include <string>
 
-using Value = std::variant<int, bool, double>;
+using Value = std::variant<int, bool, double, std::string>;
 
 struct Variable {
   Value value;

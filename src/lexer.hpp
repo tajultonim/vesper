@@ -13,12 +13,14 @@ public:
   char current() const;
   void advance();
   std::vector<Token> tokenize();
+
 private:
   std::string source;
   std::size_t position = 0;
   int line = 1;
   int column = 1;
   Token readNumber();
+  Token readString();
   Token readIdentifier();
   void skipWhitespace();
 };

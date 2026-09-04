@@ -1,3 +1,3 @@
 #pragma once
 
-enum class Type { INT, BOOL, FLOAT};
+enum class Type { INT, BOOL, FLOAT, STRING };

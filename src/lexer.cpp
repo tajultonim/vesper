@@ -47,6 +47,29 @@ Token Lexer::readNumber() {
   return Token{TokenType::INTEGER_LITERAL, c, startLine, startColumn};
 }
 
+Token Lexer::readString() {
+  std::string c;
+
+  int startLine = line;
+  int startColumn = column;
+
+  advance();
+
+  while (current() != '"' && current() != '\0') {
+    c += current();
+    advance();
+  }
+
+  if (current() == '"') {
+    advance();
+    return Token{TokenType::STRING_LITERAL, c, startLine, startColumn};
+  } else {
+    throw std::runtime_error("Unterminated string at " +
+                             std::to_string(startLine) + ":" +
+                             std::to_string(startColumn));
+  }
+}
+
 void Lexer::skipWhitespace() {
   while (current() == ' ' || current() == '\n' || current() == '\t') {
     advance();
@@ -69,6 +92,8 @@ std::vector<Token> Lexer::tokenize() {
       tokens.push_back(readNumber());
     } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
       tokens.push_back(readIdentifier());
+    } else if (c == '"') {
+      tokens.push_back(readString());
     }
 
     else if (c == '<') {
