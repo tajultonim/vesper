@@ -1,4 +1,10 @@
 
-if(1!=2){
-    print(1000);
+
+
+let x=30;
+
+if(20==1){
+    print(x/2);
+}else{
+    print(x/3);
 }
