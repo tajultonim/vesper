@@ -56,18 +56,7 @@ int main(int argc, char *argv[]) {
     Program program = parser.parseProgram();
 
     TypeChecker checker;
-
-    for (const auto &statement : program.statements) {
-      if (auto *declaration =
-              dynamic_cast<const VariableDeclaration *>(statement.get())) {
-        checker.checkDeclaration(declaration);
-      }
-
-      if (auto *assignment =
-              dynamic_cast<const AssignmentStatement *>(statement.get())) {
-        checker.checkAssignment(assignment);
-      }
-    }
+    checker.checkProgram(program);
 
     Interpreter interpreter;
     interpreter.execute(program);

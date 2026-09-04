@@ -122,3 +122,20 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
   types[declaration->name] =
       VariableInfo{expressionType, declaration->mutable_};
 }
+
+void TypeChecker::checkProgram(const Program &program) {
+  for (const auto &statement : program.statements) {
+    if (auto *declaration =
+            dynamic_cast<const VariableDeclaration *>(statement.get())) {
+      checkDeclaration(declaration);
+    } else if (auto *assignment =
+                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
+      checkAssignment(assignment);
+    } else if (auto *print =
+                   dynamic_cast<const PrintStatement *>(statement.get())) {
+      checkExpression(print->value.get());
+    } else {
+      throw std::runtime_error("Unknown statement");
+    }
+  }
+}

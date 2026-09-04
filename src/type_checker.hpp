@@ -13,10 +13,12 @@ struct VariableInfo {
 
 class TypeChecker {
 public:
+  void checkProgram(const Program &program);
+
+private:
   Type checkExpression(const Expression *expression);
   void checkDeclaration(const VariableDeclaration *declaration);
   void checkAssignment(const AssignmentStatement *assignment);
 
-private:
   std::unordered_map<std::string, VariableInfo> types;
 };
