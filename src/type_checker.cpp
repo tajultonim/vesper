@@ -27,7 +27,7 @@ Type TypeChecker::checkExpression(const Expression *expression) {
       throw std::runtime_error("Undefined variable '" + identifier->name + "'");
     }
 
-    return it->second;
+    return it->second.type;
   }
 
   if (auto *binary = dynamic_cast<const BinaryExpression *>(expression)) {
@@ -89,6 +89,26 @@ Type TypeChecker::checkExpression(const Expression *expression) {
   throw std::runtime_error("Unknown expression");
 }
 
+void TypeChecker::checkAssignment(const AssignmentStatement *assignment) {
+  auto it = types.find(assignment->name);
+
+  if (it == types.end()) {
+    throw std::runtime_error("Undefined variable '" + assignment->name + "'");
+  }
+
+  Type valueType = checkExpression(assignment->value.get());
+
+  if (!it->second.mutable_) {
+    throw std::runtime_error("Cannot assign to immutable variable '" +
+                             assignment->name + "'");
+  }
+
+  if (it->second.type != valueType) {
+    throw std::runtime_error(
+        "Type error: cannot assign value of different type");
+  }
+}
+
 void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
   Type expressionType = checkExpression(declaration->value.get());
 
@@ -98,6 +118,7 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
           "Type error: declared type does not match initializer");
     }
   }
-  
-  types[declaration->name] = expressionType;
+
+  types[declaration->name] =
+      VariableInfo{expressionType, declaration->mutable_};
 }

@@ -62,6 +62,11 @@ int main(int argc, char *argv[]) {
               dynamic_cast<const VariableDeclaration *>(statement.get())) {
         checker.checkDeclaration(declaration);
       }
+
+      if (auto *assignment =
+              dynamic_cast<const AssignmentStatement *>(statement.get())) {
+        checker.checkAssignment(assignment);
+      }
     }
 
     Interpreter interpreter;
