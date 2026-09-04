@@ -122,7 +122,6 @@ std::unique_ptr<Statement> Parser::parseDeclaration() {
   if (current().type == TokenType::COLON) {
     advance();
     statement->declaredType = parseType();
-    std::cout << current().value << std::endl;
   }
 
   expect(TokenType::EQUAL);

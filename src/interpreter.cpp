@@ -16,6 +16,7 @@ std::string valueTypeName(const Value &value) {
 
 void requireIntOperands(const Value &left, const Value &right,
                         const std::string &operatorSymbol) {
+
   if (!std::holds_alternative<int>(left) ||
       !std::holds_alternative<int>(right)) {
     throw std::runtime_error("Type error: operator '" + operatorSymbol +
@@ -39,6 +40,8 @@ Value Interpreter::evaluate(const Expression *expression) {
   if (auto *binary = dynamic_cast<const BinaryExpression *>(expression)) {
     auto left = evaluate(binary->left.get());
     auto right = evaluate(binary->right.get());
+
+    
 
     switch (binary->operatorType) {
     case TokenType::PLUS: {

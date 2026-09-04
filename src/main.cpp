@@ -7,6 +7,7 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 #include "interpreter.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "type_checker.hpp"
 
 int main(int argc, char *argv[]) {
   try {
@@ -50,15 +51,25 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
-    for (const auto &token : tokens) {
-      std::cout << "Type: " << static_cast<int>(token.type)
-                << ", Value: " << token.value << ", Line: " << token.line
-                << ", Column: " << token.column << '\n';
-    }
-
     Parser parser(tokens);
 
     Program program = parser.parseProgram();
+
+    TypeChecker checker;
+
+    for (const auto &statement : program.statements) {
+      if (auto *declaration =
+              dynamic_cast<const VariableDeclaration *>(statement.get())) {
+        Type type = checker.checkExpression(declaration->value.get());
+
+        std::cout << "Expression type: ";
+
+        if (type == Type::INT)
+          std::cout << "int\n";
+        else if (type == Type::BOOL)
+          std::cout << "bool\n";
+      }
+    }
 
     Interpreter interpreter;
     interpreter.execute(program);

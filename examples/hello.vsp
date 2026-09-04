@@ -1,5 +1,4 @@
-mut x = 10;
-print(x);
-
-x = 20;
-print(x);
+let a = 10 + 20;
+let b = 10 < 20;
+let c = true == false;
+let x = true + 10;
