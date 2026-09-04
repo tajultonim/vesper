@@ -1,10 +1,4 @@
 
-
-
-let x=30;
-
-if(20==1){
-    print(x/2);
-}else{
-    print(x/3);
+while(true){
+    print(1)
 }

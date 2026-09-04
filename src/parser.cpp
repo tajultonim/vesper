@@ -250,14 +250,18 @@ std::unique_ptr<Statement> Parser::parseIfStatement() {
 
   if (current().type == TokenType::ELSE) {
     advance();
+    if (current().type == TokenType::IF) {
+      statement->elseBranch.push_back(parseIfStatement());
+    } else {
 
-    expect(TokenType::LBRACE);
+      expect(TokenType::LBRACE);
 
-    while (current().type != TokenType::RBRACE) {
-      statement->elseBranch.push_back(parseStatement());
+      while (current().type != TokenType::RBRACE) {
+        statement->elseBranch.push_back(parseStatement());
+      }
+
+      expect(TokenType::RBRACE);
     }
-
-    expect(TokenType::RBRACE);
   }
 
   return statement;

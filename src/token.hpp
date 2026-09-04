@@ -37,6 +37,9 @@ enum class TokenType {
 
   IF,
   ELSE,
+  WHILE,
+  BREAK,
+  FOR,
 
   EQUAL,
   SEMICOLON,

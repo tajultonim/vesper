@@ -176,18 +176,32 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::LET, c, startLine, startColumn};
   } else if (c == "mut") {
     return Token{TokenType::MUT, c, startLine, startColumn};
-  } else if (c == "if") {
+  }
+
+  else if (c == "if") {
     return Token{TokenType::IF, c, startLine, startColumn};
   } else if (c == "else") {
     return Token{TokenType::ELSE, c, startLine, startColumn};
-  } else if (c == "int" || c == "bool" || c == "float") {
+  }
+
+  else if (c == "while") {
+    return Token{TokenType::WHILE, c, startLine, startColumn};
+  } else if (c == "for") {
+    return Token{TokenType::FOR, c, startLine, startColumn};
+  } else if (c == "break") {
+    return Token{TokenType::BREAK, c, startLine, startColumn};
+  }
+
+  else if (c == "int" || c == "bool" || c == "float") {
     return Token{TokenType::TYPE, c, startLine, startColumn};
-  } else if (c == "print") {
-    return Token{TokenType::PRINT, c, startLine, startColumn};
   } else if (c == "true") {
     return Token{TokenType::TRUE, c, startLine, startColumn};
   } else if (c == "false") {
     return Token{TokenType::FALSE, c, startLine, startColumn};
+  }
+
+  else if (c == "print") {
+    return Token{TokenType::PRINT, c, startLine, startColumn};
   }
 
   return Token{TokenType::IDENTIFIER, c, startLine, startColumn};
