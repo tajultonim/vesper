@@ -19,6 +19,17 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     return Type::BOOL;
   }
 
+  if (auto *identifier =
+          dynamic_cast<const IdentifierExpression *>(expression)) {
+    auto it = types.find(identifier->name);
+
+    if (it == types.end()) {
+      throw std::runtime_error("Undefined variable '" + identifier->name + "'");
+    }
+
+    return it->second;
+  }
+
   if (auto *binary = dynamic_cast<const BinaryExpression *>(expression)) {
     Type left = checkExpression(binary->left.get());
     Type right = checkExpression(binary->right.get());
@@ -87,4 +98,6 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
           "Type error: declared type does not match initializer");
     }
   }
+  
+  types[declaration->name] = expressionType;
 }
