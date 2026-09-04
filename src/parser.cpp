@@ -3,73 +3,55 @@
 
 Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
 
-std::unique_ptr<Statement> Parser::parseLet() {
-  auto statement = std::make_unique<LetStatement>();
-
-  expect(TokenType::LET);
-
-  statement->name = current().value;
-  expect(TokenType::IDENTIFIER);
-
-  expect(TokenType::EQUAL);
-
-  statement->value = parseExpression();
-
-  expect(TokenType::SEMICOLON);
-
-  return statement;
-}
-
 Token Parser::current() const { return tokens[position]; }
 
 std::string tokenTypeName(TokenType type) {
   switch (type) {
+
   case TokenType::LET:
     return "let";
+  case TokenType::MUT:
+    return "mut";
   case TokenType::PRINT:
     return "print";
 
-  case TokenType::INTEGER:
-    return "integer";
+  case TokenType::TYPE:
+    return "type";
+  case TokenType::INTEGER_LITERAL:
+    return "int";
+  case TokenType::TRUE:
+    return "true";
+  case TokenType::FALSE:
+    return "false";
 
   case TokenType::IDENTIFIER:
     return "identifier";
 
   case TokenType::PLUS:
     return "+";
-
   case TokenType::MINUS:
     return "-";
-
   case TokenType::STAR:
     return "*";
-
   case TokenType::SLASH:
     return "/";
 
   case TokenType::LPAREN:
     return "(";
-
   case TokenType::RPAREN:
     return ")";
 
   case TokenType::EQUAL:
     return "=";
-
   case TokenType::SEMICOLON:
     return ";";
+  case TokenType::COLON:
+    return ":";
 
   case TokenType::INVALID:
     return "invalid";
-
   case TokenType::END_OF_FILE:
     return "end of file";
-
-  case TokenType::TRUE:
-    return "true";
-
-  case TokenType::FALSE:
-    return "false";
 
   case TokenType::EQUAL_EQUAL:
     return "==";
@@ -102,9 +84,69 @@ bool Parser::expect(TokenType type) {
 
     return false;
   }
-
   advance();
   return true;
+}
+
+Type Parser::parseType() {
+  Token token = current();
+  expect(TokenType::TYPE);
+  if (token.value == "int") {
+    return Type::INT;
+  }
+  if (token.value == "bool") {
+    return Type::BOOL;
+  }
+  throw std::runtime_error("Unknown type '" + token.value + "'");
+}
+
+std::unique_ptr<Statement> Parser::parseDeclaration() {
+  auto statement = std::make_unique<VariableDeclaration>();
+
+  if (current().type == TokenType::MUT) {
+    statement->mutable_ = true;
+    advance();
+  } else if (current().type == TokenType::LET) {
+    statement->mutable_ = false;
+    advance();
+  } else {
+    std::cerr << "Parser error at line " << current().line << ", column "
+              << current().column << ": expected 'let' or 'mut', got "
+              << tokenTypeName(current().type) << '\n';
+    return nullptr;
+  }
+
+  statement->name = current().value;
+  expect(TokenType::IDENTIFIER);
+
+  if (current().type == TokenType::COLON) {
+    advance();
+    statement->declaredType = parseType();
+    std::cout << current().value << std::endl;
+  }
+
+  expect(TokenType::EQUAL);
+
+  statement->value = parseExpression();
+
+  expect(TokenType::SEMICOLON);
+
+  return statement;
+}
+
+std::unique_ptr<Statement> Parser::parseAssignment() {
+  auto statement = std::make_unique<AssignmentStatement>();
+
+  statement->name = current().value;
+  expect(TokenType::IDENTIFIER);
+
+  expect(TokenType::EQUAL);
+
+  statement->value = parseExpression();
+
+  expect(TokenType::SEMICOLON);
+
+  return statement;
 }
 
 std::unique_ptr<Expression> Parser::parseExpression() {
@@ -170,7 +212,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
     return expression;
   }
 
-  if (current().type == TokenType::INTEGER) {
+  if (current().type == TokenType::INTEGER_LITERAL) {
     auto expression = std::make_unique<IntegerExpression>();
     expression->value = std::stoi(current().value);
 
@@ -225,8 +267,10 @@ Program Parser::parseProgram() {
   Program program;
 
   while (current().type != TokenType::END_OF_FILE) {
-    if (current().type == TokenType::LET) {
-      program.statements.push_back(parseLet());
+    if (current().type == TokenType::LET || current().type == TokenType::MUT) {
+      program.statements.push_back(parseDeclaration());
+    } else if (current().type == TokenType::IDENTIFIER) {
+      program.statements.push_back(parseAssignment());
     } else if (current().type == TokenType::PRINT) {
       program.statements.push_back(parsePrint());
     } else {

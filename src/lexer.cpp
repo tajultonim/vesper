@@ -30,7 +30,7 @@ Token Lexer::readNumber() {
     advance();
   }
 
-  return Token{TokenType::INTEGER, c, line, column};
+  return Token{TokenType::INTEGER_LITERAL, c, line, column};
 }
 
 void Lexer::skipWhitespace() {
@@ -101,6 +101,9 @@ std::vector<Token> Lexer::tokenize() {
     else if (c == ';') {
       tokens.push_back(Token{TokenType::SEMICOLON, ";", line, column});
       advance();
+    } else if (c == ':') {
+      tokens.push_back(Token{TokenType::COLON, ":", line, column});
+      advance();
     }
 
     else if (c == '+') {
@@ -151,6 +154,10 @@ Token Lexer::readIdentifier() {
 
   if (c == "let") {
     return Token{TokenType::LET, c, startLine, startColumn};
+  } else if (c == "mut") {
+    return Token{TokenType::MUT, c, startLine, startColumn};
+  } else if (c == "int" || c == "bool") {
+    return Token{TokenType::TYPE, c, startLine, startColumn};
   } else if (c == "print") {
     return Token{TokenType::PRINT, c, startLine, startColumn};
   } else if (c == "true") {

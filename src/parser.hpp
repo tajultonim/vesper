@@ -5,6 +5,7 @@
 #include "token.hpp"
 #include <vector>
 
+
 class Parser {
 
 public:
@@ -19,9 +20,11 @@ public:
   std::unique_ptr<Expression> parseComparism();
   std::unique_ptr<Expression> parseAddition();
   std::unique_ptr<Expression> parseMultiplication();
+  Type parseType();
   Program parseProgram();
 
-  std::unique_ptr<Statement> parseLet();
+  std::unique_ptr<Statement> parseDeclaration();
+  std::unique_ptr<Statement> parseAssignment();
   std::unique_ptr<Statement> parsePrint();
 
 private:

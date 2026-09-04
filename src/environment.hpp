@@ -5,12 +5,12 @@
 
 #include "value.hpp"
 
-class Environment
-{
+class Environment {
 public:
-    void define(const std::string& name, Value value);
-    Value get(const std::string& name, int line, int column) const;
+  void define(const std::string &name, Variable value);
+  void assign(const std::string &name, Variable value, int line, int column);
+  Value get(const std::string &name, int line, int column) const;
 
 private:
-    std::unordered_map<std::string, Value> variables;
+  std::unordered_map<std::string, Variable> variables;
 };

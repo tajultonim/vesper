@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 
 #include "interpreter.hpp"
 
@@ -124,13 +125,31 @@ Value Interpreter::evaluate(const Expression *expression) {
 
 void Interpreter::execute(const Program &program) {
   for (const auto &statement : program.statements) {
-    if (auto *let = dynamic_cast<const LetStatement *>(statement.get())) {
-      Value value = evaluate(let->value.get());
-      environment.define(let->name, value);
-    } else if (auto *print =
-                   dynamic_cast<const PrintStatement *>(statement.get())) {
+    if (auto *declaration =
+            dynamic_cast<const VariableDeclaration *>(statement.get())) {
+      Value value = evaluate(declaration->value.get());
+      environment.define(declaration->name,
+                         Variable{value, declaration->mutable_});
+    } else if (auto *assignment =
+                   dynamic_cast<const AssignmentStatement *>(statement.get())) {
+      Value value = evaluate(assignment->value.get());
+      environment.assign(assignment->name, Variable{value, true},
+                         assignment->value->line, assignment->value->column);
+    }
+
+    else if (auto *print =
+                 dynamic_cast<const PrintStatement *>(statement.get())) {
       Value value = evaluate(print->value.get());
-      std::visit([](auto &&value) { std::cout << value << '\n'; }, value);
+      std::visit(
+          [](auto &&value) {
+            using T = std::decay_t<decltype(value)>;
+
+            if constexpr (std::is_same_v<T, bool>)
+              std::cout << (value ? "true" : "false") << '\n';
+            else
+              std::cout << value << '\n';
+          },
+          value);
     }
   }
 }

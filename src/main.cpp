@@ -50,6 +50,11 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
+    for (const auto &token : tokens) {
+      std::cout << "Type: " << static_cast<int>(token.type)
+                << ", Value: " << token.value << ", Line: " << token.line
+                << ", Column: " << token.column << '\n';
+    }
 
     Parser parser(tokens);
 

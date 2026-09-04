@@ -4,9 +4,15 @@
 
 enum class TokenType {
   LET,
+  MUT,
   PRINT,
-  INTEGER,
   IDENTIFIER,
+
+  TYPE,
+
+  INTEGER_LITERAL,
+  TRUE,
+  FALSE,
 
   PLUS,
   MINUS,
@@ -16,8 +22,6 @@ enum class TokenType {
   LPAREN,
   RPAREN,
 
-  TRUE,
-  FALSE,
   EQUAL_EQUAL,
   NOT_EQUAL,
   LESS,
@@ -27,6 +31,7 @@ enum class TokenType {
 
   EQUAL,
   SEMICOLON,
+  COLON,
   INVALID,
   END_OF_FILE
 };

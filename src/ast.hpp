@@ -36,11 +36,16 @@ struct Statement {
   virtual ~Statement() = default;
 };
 
-struct LetStatement : Statement {
+struct VariableDeclaration : Statement {
+  std::string name;
+  std::optional<Type> declaredType;
+  std::unique_ptr<Expression> value;
+  bool mutable_;
+};
+
+struct AssignmentStatement : Statement {
   std::string name;
   std::unique_ptr<Expression> value;
-  std::optional<Type> declaredType;
-  bool mutable_;
 };
 
 struct PrintStatement : Statement {
