@@ -2,11 +2,13 @@
 
 #include "environment.hpp"
 
-void Environment::define(const std::string &name, int value) {
+
+
+void Environment::define(const std::string &name, Value value) {
   variables[name] = value;
 }
 
-int Environment::get(const std::string &name, int line, int column) const {
+Value Environment::get(const std::string &name, int line, int column) const {
   auto it = variables.find(name);
 
   if (it == variables.end()) {

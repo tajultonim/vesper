@@ -40,6 +40,30 @@ void printExpression(const Expression *expression, int indent) {
       op = "/";
       break;
 
+    case TokenType::EQUAL_EQUAL:
+      op = "==";
+      break;
+
+    case TokenType::NOT_EQUAL:
+      op = "!=";
+      break;
+
+    case TokenType::LESS:
+      op = "<";
+      break;
+
+    case TokenType::LESS_EQUAL:
+      op = "<=";
+      break;
+
+    case TokenType::GREATER:
+      op = ">";
+      break;
+
+    case TokenType::GREATER_EQUAL:
+      op = ">=";
+      break;
+
     default:
       op = "?";
       break;
@@ -55,4 +79,3 @@ void printExpression(const Expression *expression, int indent) {
 
   std::cout << std::string(indent, ' ') << "unknown expression\n";
 }
-

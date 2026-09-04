@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
 
 
     Parser parser(tokens);
+
     Program program = parser.parseProgram();
 
     Interpreter interpreter;

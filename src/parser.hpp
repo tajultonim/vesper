@@ -16,6 +16,7 @@ public:
 
   std::unique_ptr<Expression> parsePrimary();
   std::unique_ptr<Expression> parseExpression();
+  std::unique_ptr<Expression> parseComparism();
   std::unique_ptr<Expression> parseAddition();
   std::unique_ptr<Expression> parseMultiplication();
   Program parseProgram();

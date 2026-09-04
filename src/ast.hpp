@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "token.hpp"
+#include "type.hpp"
 
 struct Expression {
   int line;
@@ -14,6 +16,10 @@ struct Expression {
 
 struct IntegerExpression : Expression {
   int value;
+};
+
+struct BooleanExpression : Expression {
+  bool value;
 };
 
 struct BinaryExpression : Expression {
@@ -33,6 +39,8 @@ struct Statement {
 struct LetStatement : Statement {
   std::string name;
   std::unique_ptr<Expression> value;
+  std::optional<Type> declaredType;
+  bool mutable_;
 };
 
 struct PrintStatement : Statement {

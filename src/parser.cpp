@@ -108,7 +108,33 @@ bool Parser::expect(TokenType type) {
 }
 
 std::unique_ptr<Expression> Parser::parseExpression() {
-  return parseAddition();
+  return parseComparism();
+}
+
+std::unique_ptr<Expression> Parser::parseComparism() {
+  auto left = parseAddition();
+
+  while (current().type == TokenType::EQUAL_EQUAL ||
+         current().type == TokenType::NOT_EQUAL ||
+         current().type == TokenType::LESS ||
+         current().type == TokenType::LESS_EQUAL ||
+         current().type == TokenType::GREATER ||
+         current().type == TokenType::GREATER_EQUAL) {
+    TokenType op = current().type;
+    advance();
+
+    auto right = parseAddition();
+
+    auto expression = std::make_unique<BinaryExpression>();
+
+    expression->left = std::move(left);
+    expression->right = std::move(right);
+    expression->operatorType = op;
+
+    left = std::move(expression);
+  }
+
+  return left;
 }
 
 std::unique_ptr<Expression> Parser::parseAddition() {
@@ -155,6 +181,15 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
   if (current().type == TokenType::IDENTIFIER) {
     auto expression = std::make_unique<IdentifierExpression>();
     expression->name = current().value;
+    expression->line = current().line;
+    expression->column = current().column;
+    advance();
+    return expression;
+  }
+
+  if (current().type == TokenType::TRUE || current().type == TokenType::FALSE) {
+    auto expression = std::make_unique<BooleanExpression>();
+    expression->value = (current().type == TokenType::TRUE);
     expression->line = current().line;
     expression->column = current().column;
     advance();
