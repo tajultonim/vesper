@@ -2,17 +2,23 @@
 #include <stdexcept>
 #include <string>
 
-void requireIntOperands(Type left, Type right,
-                        const std::string &operatorSymbol) {
-  if (left != Type::INT || right != Type::INT) {
+bool isNumeric(Type type) { return type == Type::INT || type == Type::FLOAT; }
+
+void requireNumericOperands(Type left, Type right,
+                            const std::string &operatorSymbol) {
+  if (!isNumeric(left) || !isNumeric(right)) {
     throw std::runtime_error("Type error: operator '" + operatorSymbol +
-                             "' requires int operands");
+                             "' requires numeric operands");
   }
 }
 
 Type TypeChecker::checkExpression(const Expression *expression) {
   if (dynamic_cast<const IntegerExpression *>(expression)) {
     return Type::INT;
+  }
+
+  if (dynamic_cast<const FloatExpression *>(expression)) {
+    return Type::FLOAT;
   }
 
   if (dynamic_cast<const BooleanExpression *>(expression)) {
@@ -36,35 +42,35 @@ Type TypeChecker::checkExpression(const Expression *expression) {
 
     switch (binary->operatorType) {
     case TokenType::PLUS:
-      requireIntOperands(left, right, "+");
+      requireNumericOperands(left, right, "+");
       return Type::INT;
 
     case TokenType::MINUS:
-      requireIntOperands(left, right, "-");
+      requireNumericOperands(left, right, "-");
       return Type::INT;
 
     case TokenType::STAR:
-      requireIntOperands(left, right, "*");
+      requireNumericOperands(left, right, "*");
       return Type::INT;
 
     case TokenType::SLASH:
-      requireIntOperands(left, right, "/");
+      requireNumericOperands(left, right, "/");
       return Type::INT;
 
     case TokenType::LESS:
-      requireIntOperands(left, right, "<");
+      requireNumericOperands(left, right, "<");
       return Type::BOOL;
 
     case TokenType::LESS_EQUAL:
-      requireIntOperands(left, right, "<=");
+      requireNumericOperands(left, right, "<=");
       return Type::BOOL;
 
     case TokenType::GREATER:
-      requireIntOperands(left, right, ">");
+      requireNumericOperands(left, right, ">");
       return Type::BOOL;
 
     case TokenType::GREATER_EQUAL:
-      requireIntOperands(left, right, ">=");
+      requireNumericOperands(left, right, ">=");
       return Type::BOOL;
 
     case TokenType::EQUAL_EQUAL:
@@ -82,11 +88,11 @@ Type TypeChecker::checkExpression(const Expression *expression) {
       return Type::BOOL;
 
     default:
-      throw std::runtime_error("Unknown binary operator");
+      throw std::runtime_error("Type error: Unknown binary operator");
     }
   }
 
-  throw std::runtime_error("Unknown expression");
+  throw std::runtime_error("Type error: Unknown expression");
 }
 
 void TypeChecker::checkAssignment(const AssignmentStatement *assignment) {

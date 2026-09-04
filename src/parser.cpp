@@ -19,6 +19,8 @@ std::string tokenTypeName(TokenType type) {
     return "type";
   case TokenType::INTEGER_LITERAL:
     return "int";
+  case TokenType::FLOAT_LITERAL:
+    return "float";
   case TokenType::TRUE:
     return "true";
   case TokenType::FALSE:
@@ -94,9 +96,15 @@ Type Parser::parseType() {
   if (token.value == "int") {
     return Type::INT;
   }
+
+  if (token.value == "float") {
+    return Type::FLOAT;
+  }
+
   if (token.value == "bool") {
     return Type::BOOL;
   }
+
   throw std::runtime_error("Unknown type '" + token.value + "'");
 }
 
@@ -127,7 +135,6 @@ std::unique_ptr<Statement> Parser::parseDeclaration() {
   expect(TokenType::EQUAL);
 
   statement->value = parseExpression();
-
   expect(TokenType::SEMICOLON);
 
   return statement;
@@ -219,6 +226,14 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
     return expression;
   }
 
+  if (current().type == TokenType::FLOAT_LITERAL) {
+    auto expression = std::make_unique<FloatExpression>();
+    expression->value = std::stof(current().value);
+
+    advance();
+    return expression;
+  }
+
   if (current().type == TokenType::IDENTIFIER) {
     auto expression = std::make_unique<IdentifierExpression>();
     expression->name = current().value;
@@ -273,6 +288,7 @@ Program Parser::parseProgram() {
     } else if (current().type == TokenType::PRINT) {
       program.statements.push_back(parsePrint());
     } else {
+      std::cout << tokenTypeName(current().type) << std::endl;
       std::cerr << "Unexpected token\n";
       break;
     }

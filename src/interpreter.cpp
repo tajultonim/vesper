@@ -6,19 +6,77 @@
 
 std::string valueTypeName(const Value &value) {
   if (std::holds_alternative<int>(value))
-    return "Int";
+    return "int";
 
   if (std::holds_alternative<bool>(value))
-    return "Bool";
+    return "bool";
+
+  if (std::holds_alternative<double>(value))
+    return "float";
 
   return "Unknown";
 }
 
-void requireIntOperands(const Value &left, const Value &right,
-                        const std::string &operatorSymbol) {
+double getNumericFloat(const Value &value) {
+  if (std::holds_alternative<int>(value))
+    return static_cast<double>(std::get<int>(value));
 
-  if (!std::holds_alternative<int>(left) ||
-      !std::holds_alternative<int>(right)) {
+  if (std::holds_alternative<double>(value))
+    return std::get<double>(value);
+
+  throw std::runtime_error("Expected numeric value");
+}
+
+int performIntegerArithmeticOperation(const Value &left, const Value &right,
+                                      TokenType op) {
+  int leftInt = std::get<int>(left);
+  int rightInt = std::get<int>(right);
+
+  switch (op) {
+  case TokenType::PLUS:
+    return leftInt + rightInt;
+  case TokenType::MINUS:
+    return leftInt - rightInt;
+  case TokenType::STAR:
+    return leftInt * rightInt;
+  case TokenType::SLASH:
+    if (rightInt == 0) {
+      throw std::runtime_error("Division by zero");
+    }
+    return leftInt / rightInt;
+  default:
+    throw std::runtime_error("Unknown binary operator");
+  }
+}
+
+float performFloatArithmeticOperation(const Value &left, const Value &right,
+                                      TokenType op) {
+
+  double leftFloat = getNumericFloat(left);
+  double rightFloat = getNumericFloat(right);
+
+  switch (op) {
+  case TokenType::PLUS:
+    return leftFloat + rightFloat;
+  case TokenType::MINUS:
+    return leftFloat - rightFloat;
+  case TokenType::STAR:
+    return leftFloat * rightFloat;
+  case TokenType::SLASH:
+    if (rightFloat == 0.0) {
+      throw std::runtime_error("Division by zero");
+    }
+    return leftFloat / rightFloat;
+  default:
+    throw std::runtime_error("Unknown binary operator");
+  }
+}
+
+void requireNumericOperands(const Value &left, const Value &right,
+                            const std::string &operatorSymbol) {
+
+  if (valueTypeName(left) != "float" && valueTypeName(left) != "int" ||
+      valueTypeName(right) != "float" && valueTypeName(right) != "int") {
     throw std::runtime_error("Type error: operator '" + operatorSymbol +
                              "' cannot be applied to " + valueTypeName(left) +
                              " and " + valueTypeName(right));
@@ -41,41 +99,36 @@ Value Interpreter::evaluate(const Expression *expression) {
     auto left = evaluate(binary->left.get());
     auto right = evaluate(binary->right.get());
 
-    
-
     switch (binary->operatorType) {
     case TokenType::PLUS: {
-      requireIntOperands(left, right, "+");
-      int leftInt = std::get<int>(left);
-      int rightInt = std::get<int>(right);
-
-      return leftInt + rightInt;
+      requireNumericOperands(left, right, "+");
+      if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
+        return performFloatArithmeticOperation(left, right, TokenType::PLUS);
+      }
+      return performIntegerArithmeticOperation(left, right, TokenType::PLUS);
     }
     case TokenType::MINUS: {
-      requireIntOperands(left, right, "-");
-
-      int leftInt = std::get<int>(left);
-      int rightInt = std::get<int>(right);
-      return leftInt - rightInt;
+      requireNumericOperands(left, right, "-");
+      if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
+        return performFloatArithmeticOperation(left, right, TokenType::MINUS);
+      }
+      return performIntegerArithmeticOperation(left, right, TokenType::MINUS);
     }
 
     case TokenType::STAR: {
-      requireIntOperands(left, right, "*");
-      int leftInt = std::get<int>(left);
-      int rightInt = std::get<int>(right);
-      return leftInt * rightInt;
+      requireNumericOperands(left, right, "*");
+      if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
+        return performFloatArithmeticOperation(left, right, TokenType::STAR);
+      }
+      return performIntegerArithmeticOperation(left, right, TokenType::STAR);
     }
 
     case TokenType::SLASH: {
-      requireIntOperands(left, right, "+");
-      int leftInt = std::get<int>(left);
-      int rightInt = std::get<int>(right);
-
-      if (rightInt == 0) {
-        throw std::runtime_error("Division by zero");
+      requireNumericOperands(left, right, "/");
+      if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
+        return performFloatArithmeticOperation(left, right, TokenType::SLASH);
       }
-
-      return leftInt / rightInt;
+      return performIntegerArithmeticOperation(left, right, TokenType::SLASH);
     }
 
     case TokenType::EQUAL_EQUAL:
@@ -95,20 +148,20 @@ Value Interpreter::evaluate(const Expression *expression) {
       return left != right;
 
     case TokenType::LESS:
-      requireIntOperands(left, right, "<");
-      return std::get<int>(left) < std::get<int>(right);
+      requireNumericOperands(left, right, "<");
+      return getNumericFloat(left) < getNumericFloat(right);
 
     case TokenType::LESS_EQUAL:
-      requireIntOperands(left, right, "<=");
-      return std::get<int>(left) <= std::get<int>(right);
+      requireNumericOperands(left, right, "<=");
+      return getNumericFloat(left) <= getNumericFloat(right);
 
     case TokenType::GREATER:
-      requireIntOperands(left, right, ">");
-      return std::get<int>(left) > std::get<int>(right);
+      requireNumericOperands(left, right, ">");
+      return getNumericFloat(left) > getNumericFloat(right);
 
     case TokenType::GREATER_EQUAL:
-      requireIntOperands(left, right, ">=");
-      return std::get<int>(left) >= std::get<int>(right);
+      requireNumericOperands(left, right, ">=");
+      return getNumericFloat(left) >= getNumericFloat(right);
 
     default:
       throw std::runtime_error("Unknown binary operator");
@@ -119,11 +172,15 @@ Value Interpreter::evaluate(const Expression *expression) {
     return integer->value;
   }
 
+  if (auto *floating = dynamic_cast<const FloatExpression *>(expression)) {
+    return floating->value;
+  }
+
   if (auto *boolean = dynamic_cast<const BooleanExpression *>(expression)) {
     return boolean->value;
   }
 
-  throw std::runtime_error("Unknown expression");
+  throw std::runtime_error("RUNTIME ERROR: Unknown expression");
 }
 
 void Interpreter::execute(const Program &program) {

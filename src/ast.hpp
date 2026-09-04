@@ -18,6 +18,10 @@ struct IntegerExpression : Expression {
   int value;
 };
 
+struct FloatExpression : Expression {
+  float value;
+};
+
 struct BooleanExpression : Expression {
   bool value;
 };

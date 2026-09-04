@@ -2,7 +2,7 @@
 
 #include <variant>
 
-using Value = std::variant<int, bool>;
+using Value = std::variant<int, bool, double>;
 
 struct Variable {
   Value value;
