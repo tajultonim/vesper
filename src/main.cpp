@@ -60,14 +60,7 @@ int main(int argc, char *argv[]) {
     for (const auto &statement : program.statements) {
       if (auto *declaration =
               dynamic_cast<const VariableDeclaration *>(statement.get())) {
-        Type type = checker.checkExpression(declaration->value.get());
-
-        std::cout << "Expression type: ";
-
-        if (type == Type::INT)
-          std::cout << "int\n";
-        else if (type == Type::BOOL)
-          std::cout << "bool\n";
+        checker.checkDeclaration(declaration);
       }
     }
 

@@ -55,7 +55,7 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     case TokenType::GREATER_EQUAL:
       requireIntOperands(left, right, ">=");
       return Type::BOOL;
-      
+
     case TokenType::EQUAL_EQUAL:
       if (left != right)
         throw std::runtime_error(
@@ -83,7 +83,8 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
 
   if (declaration->declaredType.has_value()) {
     if (expressionType != declaration->declaredType.value()) {
-      throw std::runtime_error("Type mismatch");
+      throw std::runtime_error(
+          "Type error: declared type does not match initializer");
     }
   }
 }
