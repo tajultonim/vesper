@@ -11,6 +11,39 @@ The long-term goal is to evolve Vesper into a language particularly suited for *
 
 ---
 
+## 🔨 Installation
+
+Vesper is not reliably distributed as built binary as it is still under development. **We highly reccomend building it on your own from the latest source code following the [Building](#-building) section.** To install prebuilt binary: 
+
+- Go to the latest realease in github following this [url](https://github.com/tajultonim/vesper/releases/latest).
+- Download the `vesper` and `vspfmt` binary (i.e. `vesper.exe`, `vspfmt.exe`) if available for your platform.
+- Add the binary to your environment path variable.
+- Use the `vesper` binary to run your code and `vsfmt` to format your code. For more see [this section](#usage).
+- For language support and auto formatting in vs code, read the doc and install [Vesper VSCode](http://github.com/tajultonim/vesper-vscode) extension.
+
+
+## Usage
+
+At first make sure you have the `vesper` and `vspfmt` binary in your path variable otherwise you will have to referene it by path.
+
+### Running a vesper program
+Assuming you have it in path you can run the command below. If you do not have the binary in path variable you'll have to reference like `.\bin\vesper.exe .\path\to\vesper-file.vsp`. Replace `.\bin\` with the directory the binary is located in.
+
+```powershell
+vesper .\path\to\vesper-file.vsp
+```
+
+### Formatting a vesper file
+
+If you want to overwrite a `.vsp` file with it's formatted version, run the command below. The issue with path is same as before.
+
+```powershell
+vspfmt .\path\to\vesper-file.vsp -w
+```
+the `-w` flag is used to overwrite the file with formatted version. Without it it will output the formatted version in standard output.
+For more convinient formatting and syntax highlighting support, install the [Vesper VSCode](http://github.com/tajultonim/vesper-vscode) extension and set up with your formatter binary.
+
+
 ## ✨ Features
 
 Vesper is currently under active development.
