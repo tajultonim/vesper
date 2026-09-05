@@ -657,7 +657,7 @@ It is currently intended for **learning, experimentation, and language-developme
 
 ## 📄 License
 
-Vesper is released under the **MIT License**.
+Vesper is released under the **GPL3 License**.
 
 See [`LICENSE`](LICENSE) for details.
 
