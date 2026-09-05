@@ -23,6 +23,8 @@ enum class TokenType {
   MINUS,
   STAR,
   SLASH,
+  STAR_STAR,
+  SLASH_SLASH,
 
   LPAREN,
   RPAREN,
@@ -45,6 +47,7 @@ enum class TokenType {
   FOR,
 
   EQUAL,
+  PERCENT,
   COMMA,
   SEMICOLON,
   COLON,

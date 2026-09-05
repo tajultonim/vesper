@@ -21,7 +21,7 @@ add_executable(vspfmt
     src/lexer.cpp
     src/parser.cpp
     src/ast.cpp
-    src/formatter.cpp
+    tools/formatter.cpp
     src/token.cpp
 )
 

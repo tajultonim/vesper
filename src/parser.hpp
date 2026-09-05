@@ -20,6 +20,9 @@ public:
   std::unique_ptr<Expression> parseAddition();
   std::unique_ptr<Expression> parseMultiplication();
   std::unique_ptr<Expression> parseArray();
+  std::unique_ptr<Expression> parsePostfix();
+  std::unique_ptr<Expression> parseExponentiation();
+  std::unique_ptr<Expression> parseUnary();
   Type parseType();
   Program parseProgram();
 

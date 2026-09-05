@@ -1,476 +1,468 @@
-<h1 align="center">
- <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-icon.svg" width="50" height="50"/><br> VESPER
-</h1>
+# Vesper
 
-> A small programming language and interpreter built from scratch in C++.
+> A small, expressive programming language designed for learning, experimentation, and scientific computing.
 
-Vesper is an experimental programming language designed and implemented from the ground up to explore how programming languages work internally - from **lexing and parsing to AST construction and interpretation**.
+**Vesper** is a programming language I'm building from scratch in C++. The project started as an exploration of how programming languages work internally—from lexing and parsing to type checking, interpretation, and eventually compilation to native code.
 
-The project is being developed incrementally, with the long-term goal of evolving Vesper into a more complete compiled language.
-
-## 🚧 Project Status
-
-**Early development - experimental**
-
-The current implementation already supports:
-
-* Lexical analysis
-* Recursive-descent parsing
-* Abstract Syntax Trees (AST)
-* Integer expressions
-* Arithmetic operators
-* Operator precedence
-* Parenthesized expressions
-* Variables
-* Variable references
-* `let` declarations
-* `print(...)`
-* Expression evaluation
-* Runtime environment
-
-More language features and a compiler backend are planned.
+The long-term goal is to evolve Vesper into a language that is particularly well suited for **scientific computing and high-performance computing (HPC)** while keeping the language simple and expressive.
 
 ---
 
-## Example
+## ✨ Features
 
-A simple Vesper program:
+Vesper is currently under active development.
 
-```vesper
-let x = 10;
-let y = x + 20;
+### Variables
 
-print(x);
-print(y);
-print(x * y);
-```
-
-Output:
-
-```text
-10
-30
-300
-```
-
-Expressions support standard arithmetic precedence:
+Variables are immutable by default, with `mut` available for mutable variables.
 
 ```vesper
-let result = 10 + 20 * 3;
+let name = "Vesper"
+let age: int = 20
 
-print(result);
+mut counter = 0
+counter = counter + 1
 ```
 
-Output:
+### Type Annotations
 
-```text
-70
-```
-
-Parentheses can be used to explicitly control evaluation:
+Vesper supports optional type annotations and type inference.
 
 ```vesper
-let result = (10 + 20) * 3;
-
-print(result);
+let x: int = 42
+let temperature: float = 36.5
+let enabled: bool = true
+let message: string = "Hello"
 ```
 
-Output:
+### Functions
+
+Functions use a concise syntax with typed parameters and return values.
+
+```vesper
+fn square(x: float): float {
+    x ** 2
+}
+
+fn add(a: int, b: int): int {
+    a + b
+}
+
+fn hello(): string {
+    "Hello"
+}
+```
+
+### Arrays
+
+Arrays can contain values of any supported type.
+
+```vesper
+let numbers: [int] = [1, 2, 3, 4, 5]
+
+let names: [string] = [
+    "Alice",
+    "Bob",
+    "Charlie"
+]
+```
+
+Nested arrays are supported, allowing multidimensional data structures:
+
+```vesper
+let matrix: [[int]] = [
+    [1, 2, 3],
+    [4, 5, 6]
+]
+```
+
+### Array Indexing
+
+Arrays can be indexed and chained:
+
+```vesper
+numbers[0]
+
+matrix[0][1]
+```
+
+### Arithmetic
+
+Vesper supports standard arithmetic operators as well as operators useful for numerical computing.
 
 ```text
-90
++    Addition
+-    Subtraction
+*    Multiplication
+/    Division
+%    Remainder
+//   Floor division
+**   Exponentiation
+```
+
+Examples:
+
+```vesper
+let a = 10 % 3
+let b = 10 // 3
+let c = 2 ** 10
+let d = 2 ** -2
+```
+
+Exponentiation is right-associative:
+
+```vesper
+2 ** 3 ** 2
+```
+
+is interpreted as:
+
+```text
+2 ** (3 ** 2)
+```
+
+### Unary Operators
+
+Unary operators are supported for numeric values.
+
+```vesper
+let x = -42
+let y = +10
+```
+
+Exponentiation follows mathematical precedence:
+
+```vesper
+-2 ** 2
+```
+
+is interpreted as:
+
+```text
+-(2 ** 2)
 ```
 
 ---
 
-## Architecture
+## 🧠 Type System
 
-Vesper currently follows a traditional interpreter pipeline:
+Vesper uses a compositional type system.
+
+Currently supported primitive types include:
 
 ```text
-Source Code
-    │
-    ▼
-  Lexer
-    │
-    ▼
-  Tokens
-    │
-    ▼
-  Parser
-    │
-    ▼
-   AST
-    │
-    ▼
-Interpreter
-    │
-    ▼
-Environment
-    │
-    ▼
-  Output
+int
+float
+bool
+string
 ```
 
-### Lexer
+Array types are represented recursively:
 
-The lexer converts source code into a sequence of tokens.
+```text
+[int]
+[[int]]
+[[[float]]]
+```
+
+This allows multidimensional structures without introducing a separate type for every dimension.
+
+The type checker catches errors before execution.
 
 For example:
 
 ```vesper
-let x = 10 + 20;
+let numbers: [int] = [1, 2, "three"]
 ```
 
-becomes conceptually:
-
-```text
-LET
-IDENTIFIER
-EQUAL
-INTEGER
-PLUS
-INTEGER
-SEMICOLON
-END_OF_FILE
-```
-
-### Parser
-
-Vesper uses a **recursive-descent parser**.
-
-Expression precedence is represented by the parser hierarchy:
-
-```text
-parseExpression()
-      │
-      ├── + -
-      │
-      ▼
-parseMultiplication()
-      │
-      ├── * /
-      │
-      ▼
-parsePrimary()
-      │
-      ├── integers
-      ├── identifiers
-      └── (...)
-```
-
-This allows:
-
-```vesper
-10 + 20 * 3
-```
-
-to produce an AST equivalent to:
-
-```text
-      +
-     / \
-   10   *
-       / \
-      20  3
-```
-
-rather than:
-
-```text
-      *
-     / \
-    +   3
-   / \
- 10  20
-```
-
-### Abstract Syntax Tree
-
-The parser constructs an AST using C++ classes and `std::unique_ptr`.
-
-Current expression hierarchy:
-
-```text
-Expression
-├── IntegerExpression
-├── IdentifierExpression
-└── BinaryExpression
-```
-
-Statement hierarchy:
-
-```text
-Statement
-├── LetStatement
-└── PrintStatement
-```
-
-A complete program contains a collection of statements.
-
-### Interpreter
-
-The interpreter recursively evaluates the AST.
-
-For:
-
-```vesper
-x + 20
-```
-
-the interpreter:
-
-1. Looks up `x` in the environment.
-2. Evaluates `20`.
-3. Applies `+`.
-4. Returns the resulting integer.
-
-The runtime environment currently stores variables as name/value pairs.
+is rejected because all elements of an array must have the same type.
 
 ---
 
-## Project Structure
+## 🏗️ Architecture
+
+Vesper currently follows a traditional language-processing pipeline:
+
+```text
+              Vesper Source
+                    │
+                    ▼
+                 Lexer
+                    │
+                    ▼
+                 Parser
+                    │
+                    ▼
+                   AST
+                    │
+                    ▼
+              Type Checker
+                    │
+                    ▼
+               Interpreter
+```
+
+The long-term architecture is planned to become:
+
+```text
+              Vesper Source
+                    │
+                    ▼
+                 Lexer
+                    │
+                    ▼
+                 Parser
+                    │
+                    ▼
+                   AST
+                    │
+                    ▼
+              Type Checker
+                    │
+                    ▼
+                 Vesper IR
+                  /     \
+                 /       \
+                ▼         ▼
+         Interpreter   Compiler
+                          │
+                          ▼
+                    Optimization
+                          │
+                          ▼
+                    Code Generation
+                          │
+                          ▼
+                  Native Executable
+```
+
+The interpreter will serve as a reference implementation while the compiler evolves independently.
+
+---
+
+## 🔧 Built With
+
+Vesper is currently implemented in **C++17**.
+
+### Core
+
+* C++17
+* CMake
+* MinGW / GCC
+
+### Compiler Components
+
+* Hand-written lexer
+* Recursive-descent parser
+* Abstract Syntax Tree (AST)
+* Static type checker
+* Tree-walking interpreter
+
+---
+
+## 📁 Project Structure
 
 ```text
 vesper/
 ├── CMakeLists.txt
-└── src/
-    ├── main.cpp
-    ├── token.hpp
-    ├── lexer.hpp
-    ├── lexer.cpp
-    ├── ast.hpp
-    ├── ast.cpp
-    ├── parser.hpp
-    ├── parser.cpp
-    ├── environment.hpp
-    ├── environment.cpp
-    ├── interpreter.hpp
-    └── interpreter.cpp
+│
+├── src/
+│   ├── main.cpp
+│   ├── token.hpp
+│   ├── token.cpp
+│   ├── lexer.hpp
+│   ├── lexer.cpp
+│   ├── ast.hpp
+│   ├── ast.cpp
+│   ├── parser.hpp
+│   ├── parser.cpp
+│   ├── environment.hpp
+│   ├── environment.cpp
+│   ├── interpreter.hpp
+│   ├── interpreter.cpp
+│   ├── value.hpp
+│   ├── type.hpp
+│   ├── type_checker.hpp
+│   └── type_checker.cpp
+│
+├── tests/
+│   └── type_checker_test.cpp
+│
+└── tools/
+    └── vesperfmt.cpp
 ```
-
-### Components
-
-| File            | Purpose                                |
-| --------------- | -------------------------------------- |
-| `token.hpp`     | Token types and token representation   |
-| `lexer.*`       | Source-code tokenization               |
-| `ast.*`         | AST node definitions and AST utilities |
-| `parser.*`      | Recursive-descent parser               |
-| `environment.*` | Runtime variable storage               |
-| `interpreter.*` | AST evaluation and execution           |
-| `main.cpp`      | Program entry point                    |
 
 ---
 
-## Building
+## 🚀 Building
 
-### Requirements
-
-* C++17-compatible compiler
-* GCC, Clang, or MSVC
-* CMake *(optional; direct compilation is currently possible)*
-
-### GCC
-
-From the project root:
+Clone the repository:
 
 ```bash
-g++ src/main.cpp \
-    src/lexer.cpp \
-    src/parser.cpp \
-    src/ast.cpp \
-    src/environment.cpp \
-    src/interpreter.cpp \
-    -o vesper
+git clone https://github.com/tajultonim/vesper.git
+cd vesper
+```
+
+Configure the project:
+
+```bash
+cmake -S . -B build
+```
+
+Build:
+
+```bash
+cmake --build build
+```
+
+The Vesper executable will be generated inside `build/`.
+
+Run a Vesper program:
+
+```bash
+./build/vesper examples/hello.vsp
 ```
 
 On Windows:
 
 ```powershell
-g++ src/main.cpp src/lexer.cpp src/parser.cpp src/ast.cpp src/environment.cpp src/interpreter.cpp -o vesper
-```
-
-Run:
-
-```powershell
-.\vesper.exe
+.\build\vesper.exe .\examples\hello.vsp
 ```
 
 ---
 
-## Current Language
+## 🧪 Testing
 
-### Variables
+Vesper uses CTest for its test suite.
 
-Variables are declared with `let`:
-
-```vesper
-let x = 10;
-let y = x + 20;
+```bash
+ctest --test-dir build
 ```
 
-### Arithmetic
+Or build and run the tests through CMake:
 
-Supported operators:
-
-```text
-+   addition
--   subtraction
-*   multiplication
-/   division
-```
-
-Example:
-
-```vesper
-let result = 10 + 20 * 3;
-print(result);
-```
-
-### Parentheses
-
-```vesper
-let result = (10 + 20) * 3;
-print(result);
-```
-
-### Output
-
-Use `print(...)`:
-
-```vesper
-print(42);
-print(x);
-print(x + 10);
+```bash
+cmake --build build
+ctest --test-dir build
 ```
 
 ---
 
-## Roadmap
+## 🎯 Roadmap
 
-Vesper is being developed incrementally.
+Vesper is still in its early stages.
 
 ### Language
 
-* [x] Integer literals
-* [x] Identifiers
-* [x] `let` declarations
-* [x] Arithmetic expressions
-* [x] Operator precedence
-* [x] Parenthesized expressions
-* [x] Variable references
-* [x] `print(...)`
-* [ ] Better parser error handling
-* [ ] Booleans
-* [ ] Comparison operators
-* [ ] Logical operators
-* [ ] `if` expressions/statements
-* [ ] `while`
-* [ ] Mutable variables
+* [x] Variables
+* [x] Mutable variables
+* [x] Type annotations
+* [x] Type inference
+* [x] Primitive types
+* [x] Arrays
+* [x] Nested arrays
+* [x] Array indexing
+* [x] Arithmetic operators
+* [x] Floor division
+* [x] Exponentiation
+* [x] Unary operators
+* [x] Static type checking
 * [ ] Functions
 * [ ] Function calls
-* [ ] `return`
-* [ ] Strings
-* [ ] Arrays
+* [ ] Explicit `return`
+* [ ] `for` loops
+* [ ] `range`
+* [ ] Tuples
+* [ ] Slicing
 * [ ] Structs
 * [ ] Pattern matching
-* [ ] Type system
-* [ ] Type inference
+* [ ] Generics
+* [ ] Standard library
 
 ### Compiler
 
-The long-term goal is to move beyond interpretation:
+* [ ] Intermediate representation
+* [ ] IR interpreter
+* [ ] Constant folding
+* [ ] Basic optimizations
+* [ ] Native code generation
+* [ ] RISC-V backend
+* [ ] LLVM backend
+* [ ] AOT compilation
+* [ ] JIT compilation
 
-```text
-Vesper Source
-      │
-      ▼
-    Lexer
-      │
-      ▼
-    Parser
-      │
-      ▼
-     AST
-      │
-      ▼
-Semantic Analysis
-      │
-      ▼
-     IR
-      │
-      ▼
- Optimization
-      │
-      ▼
-Code Generation
-      │
-      ▼
- Machine Code
-```
+### Scientific Computing
 
-Potential future targets include:
+The long-term goal is to make Vesper useful for numerical and scientific workloads.
 
-* RISC-V
-* x86-64
-* LLVM
-* WebAssembly
+Planned areas include:
+
+* [ ] Matrix types
+* [ ] Tensor types
+* [ ] Linear algebra
+* [ ] Numerical methods
+* [ ] Scientific standard library
+* [ ] SIMD/vectorization
+* [ ] Parallel computing
+* [ ] MPI support
+* [ ] GPU computing
 
 ---
 
-## Why Vesper?
+## 🔬 Why Vesper?
 
-Vesper is primarily a **learning and experimentation project**.
+Vesper is primarily a **learning project**, but it is being designed with a larger goal in mind.
 
-The goal isn't simply to create another programming language. The project is an opportunity to understand how languages work internally:
-
-* How source code becomes tokens
-* How grammars become parsers
-* How expressions become trees
-* How ASTs represent program structure
-* How interpreters execute programs
-* How variables are represented at runtime
-* How type systems work
-* How intermediate representations work
-* How compilers eventually produce machine code
-
-The project is intentionally being built from the ground up rather than immediately relying on a complete compiler framework.
-
----
-
-## Development Philosophy
-
-Vesper is developed incrementally.
-
-Rather than implementing the entire language at once, each feature is added through the complete pipeline:
+I want to understand programming languages from the inside out:
 
 ```text
-Language Feature
-      ↓
-Lexer
-      ↓
-Parser
-      ↓
+Syntax
+  ↓
+Lexing
+  ↓
+Parsing
+  ↓
 AST
-      ↓
-Interpreter
-      ↓
-Tests
+  ↓
+Type Systems
+  ↓
+Interpretation
+  ↓
+Intermediate Representation
+  ↓
+Optimization
+  ↓
+Code Generation
+  ↓
+Machine Code
 ```
 
-This makes the implementation easier to understand and provides a foundation for eventually building a compiler.
+At the same time, Vesper is an experiment in what a small language designed around **scientific computing and HPC** could look like.
+
+The project is intentionally being built from the ground up rather than relying on a parser generator or compiler framework for the core language implementation.
 
 ---
 
-## Contributing
+## 📚 Project Status
 
-Vesper is currently an experimental personal project, but ideas, issues, and discussions are welcome.
+**Vesper is experimental and under active development.**
 
-If you're interested in programming languages, compilers, interpreters, C++, or low-level systems programming, feel free to explore the code and open an issue.
+The language syntax, type system, standard library, and compiler architecture may change substantially as the project develops.
+
+It is currently suitable for experimentation and learning rather than production use.
 
 ---
 
-## License
+## 📄 License
 
-This project is licensed under the **GPL3 License**.
+Vesper is released under the **MIT License**.
+
+See [`LICENSE`](LICENSE) for details.
+
+---
+
+## 👤 Author
+
+**Tajul Tonim**
+
+Built as an ongoing exploration of programming languages, compilers, numerical computing, and high-performance computing.

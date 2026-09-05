@@ -34,6 +34,16 @@ struct ArrayExpression : Expression {
   std::vector<std::unique_ptr<Expression>> elements;
 };
 
+struct IndexExpression : Expression {
+  std::unique_ptr<Expression> object;
+  std::unique_ptr<Expression> index;
+};
+
+struct UnaryExpression : Expression {
+  TokenType operatorType;
+  std::unique_ptr<Expression> operand;
+};
+
 struct BinaryExpression : Expression {
   std::unique_ptr<Expression> left;
   std::unique_ptr<Expression> right;

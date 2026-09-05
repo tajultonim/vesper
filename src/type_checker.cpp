@@ -1,32 +1,46 @@
 #include "type_checker.hpp"
+
 #include <stdexcept>
 #include <string>
 
-bool isNumeric(Type type) { return type == Type::INT || type == Type::FLOAT; }
+bool sameType(const Type &a, const Type &b) {
+  if (a.kind != b.kind)
+    return false;
 
-void requireNumericOperands(Type left, Type right,
+  if (a.kind == Type::Kind::ARRAY) {
+    return sameType(*a.elementType, *b.elementType);
+  }
+
+  return true;
+}
+
+bool isNumeric(Type::Kind type) {
+  return type == Type::Kind::INT || type == Type::Kind::FLOAT;
+}
+
+void requireNumericOperands(Type::Kind left, Type::Kind right,
                             const std::string &operatorSymbol) {
   if (!isNumeric(left) || !isNumeric(right)) {
-    throw std::runtime_error("Type error: operator '" + operatorSymbol +
+    throw std::runtime_error("TYPE ERROR: operator '" + operatorSymbol +
                              "' requires numeric operands");
   }
 }
 
 Type TypeChecker::checkExpression(const Expression *expression) {
   if (dynamic_cast<const IntegerExpression *>(expression)) {
-    return Type::INT;
+    return Type(Type::Kind::INT);
   }
 
   if (dynamic_cast<const StringExpression *>(expression)) {
-    return Type::STRING;
+    return Type(Type::Kind::STRING);
   }
 
   if (dynamic_cast<const FloatExpression *>(expression)) {
-    return Type::FLOAT;
+    return Type(Type::Kind::FLOAT);
   }
 
   if (dynamic_cast<const BooleanExpression *>(expression)) {
-    return Type::BOOL;
+    return Type(Type::Kind::BOOL);
   }
 
   if (auto *identifier =
@@ -34,10 +48,69 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     auto it = types.find(identifier->name);
 
     if (it == types.end()) {
-      throw std::runtime_error("Undefined variable '" + identifier->name + "'");
+      throw std::runtime_error("TYPE ERROR: Undefined variable '" +
+                               identifier->name + "'");
     }
 
     return it->second.type;
+  }
+
+  if (auto *array = dynamic_cast<const ArrayExpression *>(expression)) {
+    if (array->elements.empty()) {
+      throw std::runtime_error("TYPE ERROR: cannot infer type of empty array");
+    }
+
+    Type elementType = checkExpression(array->elements[0].get());
+
+    for (std::size_t i = 1; i < array->elements.size(); ++i) {
+      Type currentType = checkExpression(array->elements[i].get());
+
+      if (!sameType(elementType, currentType)) {
+        throw std::runtime_error(
+            "TYPE ERROR: array elements must have the same type");
+      }
+    }
+
+    return Type(Type::Kind::ARRAY,
+                std::make_unique<Type>(std::move(elementType)));
+  }
+
+  if (auto *index = dynamic_cast<const IndexExpression *>(expression)) {
+    Type objectType = checkExpression(index->object.get());
+    Type indexType = checkExpression(index->index.get());
+
+    if (objectType.kind != Type::Kind::ARRAY) {
+      throw std::runtime_error("TYPE ERROR: cannot index a non-array value");
+    }
+
+    if (indexType.kind != Type::Kind::INT) {
+      throw std::runtime_error("TYPE ERROR: array index must be an integer");
+    }
+
+    return *objectType.elementType;
+  }
+
+  if (auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
+    Type operandType = checkExpression(unary->operand.get());
+
+    switch (unary->operatorType) {
+    case TokenType::MINUS:
+      if (!isNumeric(operandType.kind)) {
+        throw std::runtime_error(
+            "TYPE ERROR: unary '-' operator requires a numeric operand");
+      }
+      return operandType;
+
+    case TokenType::PLUS:
+      if (!isNumeric(operandType.kind)) {
+        throw std::runtime_error(
+            "TYPE ERROR: unary '+' operator requires a numeric operand");
+      }
+      return operandType;
+
+    default:
+      throw std::runtime_error("TYPE ERROR: Unknown unary operator");
+    }
   }
 
   if (auto *binary = dynamic_cast<const BinaryExpression *>(expression)) {
@@ -46,95 +119,138 @@ Type TypeChecker::checkExpression(const Expression *expression) {
 
     switch (binary->operatorType) {
     case TokenType::PLUS:
-      if (left == Type::STRING && right == Type::STRING) {
-        return Type::STRING;
-      }
-      requireNumericOperands(left, right, "+");
-      if (left == Type::FLOAT || right == Type::FLOAT)
-        return Type::FLOAT;
 
-      return Type::INT;
+      if (left.kind == Type::Kind::STRING && right.kind == Type::Kind::STRING) {
+        return Type(Type::Kind::STRING);
+      }
+
+      requireNumericOperands(left.kind, right.kind, "+");
+
+      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
+        return Type(Type::Kind::FLOAT);
+      }
+
+      return Type(Type::Kind::INT);
 
     case TokenType::MINUS:
-      requireNumericOperands(left, right, "-");
-      if (left == Type::FLOAT || right == Type::FLOAT)
-        return Type::FLOAT;
 
-      return Type::INT;
+      requireNumericOperands(left.kind, right.kind, "-");
 
-    case TokenType::STAR:
-      if (left == Type::STRING && right == Type::INT) {
-        return Type::STRING;
+      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
+        return Type(Type::Kind::FLOAT);
       }
 
-      requireNumericOperands(left, right, "*");
-      if (left == Type::FLOAT || right == Type::FLOAT)
-        return Type::FLOAT;
+      return Type(Type::Kind::INT);
 
-      return Type::INT;
+    case TokenType::STAR:
+
+      if (left.kind == Type::Kind::STRING && right.kind == Type::Kind::INT) {
+        return Type(Type::Kind::STRING);
+      }
+
+      requireNumericOperands(left.kind, right.kind, "*");
+
+      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
+        return Type(Type::Kind::FLOAT);
+      }
+
+      return Type(Type::Kind::INT);
 
     case TokenType::SLASH:
-      requireNumericOperands(left, right, "/");
-      if (left == Type::FLOAT || right == Type::FLOAT)
-        return Type::FLOAT;
 
-      return Type::INT;
+      requireNumericOperands(left.kind, right.kind, "/");
+
+      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
+        return Type(Type::Kind::FLOAT);
+      }
+
+      return Type(Type::Kind::INT);
 
     case TokenType::LESS:
-      requireNumericOperands(left, right, "<");
-      return Type::BOOL;
+
+      requireNumericOperands(left.kind, right.kind, "<");
+
+      return Type(Type::Kind::BOOL);
 
     case TokenType::LESS_EQUAL:
-      requireNumericOperands(left, right, "<=");
-      return Type::BOOL;
+
+      requireNumericOperands(left.kind, right.kind, "<=");
+
+      return Type(Type::Kind::BOOL);
 
     case TokenType::GREATER:
-      requireNumericOperands(left, right, ">");
-      return Type::BOOL;
+
+      requireNumericOperands(left.kind, right.kind, ">");
+
+      return Type(Type::Kind::BOOL);
 
     case TokenType::GREATER_EQUAL:
-      requireNumericOperands(left, right, ">=");
-      return Type::BOOL;
+
+      requireNumericOperands(left.kind, right.kind, ">=");
+
+      return Type(Type::Kind::BOOL);
 
     case TokenType::EQUAL_EQUAL:
-      if (left != right)
-        throw std::runtime_error(
-            "Type error: operands of '==' must have the same type");
 
-      return Type::BOOL;
+      if (!sameType(left, right)) {
+        throw std::runtime_error("TYPE ERROR: operands of '==' "
+                                 "must have the same type");
+      }
+
+      return Type(Type::Kind::BOOL);
+
+    case TokenType::STAR_STAR:
+      requireNumericOperands(left.kind, right.kind, "**");
+      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
+        return Type(Type::Kind::FLOAT);
+      }
+      return Type(Type::Kind::INT);
+
+    case TokenType::SLASH_SLASH:
+      requireNumericOperands(left.kind, right.kind, "//");
+      return Type(Type::Kind::INT);
+
+    case TokenType::PERCENT:
+      requireNumericOperands(left.kind, right.kind, "%");
+      return Type(Type::Kind::INT);
 
     case TokenType::NOT_EQUAL:
-      if (left != right)
-        throw std::runtime_error(
-            "Type error: operands of '!=' must have the same type");
 
-      return Type::BOOL;
+      if (!sameType(left, right)) {
+        throw std::runtime_error("TYPE ERROR: operands of '!=' "
+                                 "must have the same type");
+      }
+
+      return Type(Type::Kind::BOOL);
 
     default:
-      throw std::runtime_error("Type error: Unknown binary operator");
+
+      throw std::runtime_error("TYPE ERROR: Unknown binary operator");
     }
   }
 
-  throw std::runtime_error("Type error: Unknown expression");
+  throw std::runtime_error("TYPE ERROR: Unknown expression");
 }
 
 void TypeChecker::checkAssignment(const AssignmentStatement *assignment) {
   auto it = types.find(assignment->name);
 
   if (it == types.end()) {
-    throw std::runtime_error("Undefined variable '" + assignment->name + "'");
+    throw std::runtime_error("TYPE ERROR: Undefined variable '" +
+                             assignment->name + "'");
   }
 
   Type valueType = checkExpression(assignment->value.get());
 
   if (!it->second.mutable_) {
-    throw std::runtime_error("Cannot assign to immutable variable '" +
-                             assignment->name + "'");
+    throw std::runtime_error(
+        "TYPE ERROR: Cannot assign to immutable variable '" + assignment->name +
+        "'");
   }
 
-  if (it->second.type != valueType) {
+  if (!sameType(it->second.type, valueType)) {
     throw std::runtime_error(
-        "Type error: cannot assign value of different type");
+        "TYPE ERROR: cannot assign value of different type");
   }
 }
 
@@ -142,14 +258,14 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
   Type expressionType = checkExpression(declaration->value.get());
 
   if (declaration->declaredType.has_value()) {
-    if (expressionType != declaration->declaredType.value()) {
-      throw std::runtime_error(
-          "Type error: declared type does not match initializer");
+    if (!sameType(expressionType, declaration->declaredType.value())) {
+      throw std::runtime_error("TYPE ERROR: declared type does not "
+                               "match initializer");
     }
   }
 
-  types[declaration->name] =
-      VariableInfo{expressionType, declaration->mutable_};
+  types.insert_or_assign(declaration->name,
+                         VariableInfo{expressionType, declaration->mutable_});
 }
 
 void TypeChecker::checkStatement(const Statement *statement) {
@@ -167,16 +283,16 @@ void TypeChecker::checkStatement(const Statement *statement) {
                  dynamic_cast<const WhileStatement *>(statement)) {
     checkWhileStatement(whileStatement);
   } else {
-    throw std::runtime_error("Unknown statement");
+    throw std::runtime_error("TYPE ERROR: Unknown statement");
   }
 }
 
 void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
   Type conditionType = checkExpression(ifStatement->condition.get());
 
-  if (conditionType != Type::BOOL) {
-    throw std::runtime_error(
-        "Type error: condition of 'if' statement must be a boolean");
+  if (conditionType.kind != Type::Kind::BOOL) {
+    throw std::runtime_error("TYPE ERROR: condition of 'if' "
+                             "statement must be a boolean");
   }
 
   for (const auto &statement : ifStatement->thenBranch) {
@@ -191,9 +307,9 @@ void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
 void TypeChecker::checkWhileStatement(const WhileStatement *whileStatement) {
   Type conditionType = checkExpression(whileStatement->condition.get());
 
-  if (conditionType != Type::BOOL) {
-    throw std::runtime_error(
-        "Type error: condition of 'while' statement must be a boolean");
+  if (conditionType.kind != Type::Kind::BOOL) {
+    throw std::runtime_error("TYPE ERROR: condition of 'while' "
+                             "statement must be a boolean");
   }
 
   for (const auto &statement : whileStatement->body) {

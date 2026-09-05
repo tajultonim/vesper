@@ -14,9 +14,10 @@ void Parser::advance() {
 
 bool Parser::expect(TokenType type) {
   if (current().type != type) {
-    std::cerr << "Parser error at line " << current().line << ", column "
-              << current().column << ": expected " << tokenTypeName(type)
-              << ", got " << tokenTypeName(current().type) << '\n';
+    std::cerr << "PARSER ERROR: Parser error at line " << current().line
+              << ", column " << current().column << ": expected "
+              << tokenTypeName(type) << ", got "
+              << tokenTypeName(current().type) << '\n';
 
     return false;
   }
@@ -25,25 +26,43 @@ bool Parser::expect(TokenType type) {
 }
 
 Type Parser::parseType() {
-  Token token = current();
-  expect(TokenType::TYPE);
-  if (token.value == "int") {
-    return Type::INT;
+  if (current().type == TokenType::TYPE) {
+    std::string typeName = current().value;
+    advance();
+    if (typeName == "int")
+      return Type(Type::Kind::INT);
+
+    if (typeName == "float")
+      return Type(Type::Kind::FLOAT);
+
+    if (typeName == "bool")
+      return Type(Type::Kind::BOOL);
+
+    if (typeName == "string")
+      return Type(Type::Kind::STRING);
+
+    throw std::runtime_error("PARSER ERROR:Unknown type: " + typeName);
   }
 
-  if (token.value == "float") {
-    return Type::FLOAT;
+  if (current().type == TokenType::LBRACKET) {
+    advance();
+
+    Type elementType = parseType();
+
+    if (current().type != TokenType::RBRACKET) {
+      throw std::runtime_error("PARSER ERROR:Expected ']'");
+    }
+
+    advance();
+
+    return Type(Type::Kind::ARRAY,
+                std::make_unique<Type>(std::move(elementType)));
   }
 
-  if (token.value == "bool") {
-    return Type::BOOL;
-  }
-
-  if (token.value == "string") {
-    return Type::STRING;
-  }
-
-  throw std::runtime_error("Unknown type '" + token.value + "'");
+  throw std::runtime_error("PARSER ERROR: Expected type got " +
+                           tokenTypeName(current().type) + "at line " +
+                           std::to_string(current().line) + ", column " +
+                           std::to_string(current().column));
 }
 
 std::unique_ptr<Statement> Parser::parseDeclaration() {
@@ -56,8 +75,9 @@ std::unique_ptr<Statement> Parser::parseDeclaration() {
     statement->mutable_ = false;
     advance();
   } else {
-    std::cerr << "Parser error at line " << current().line << ", column "
-              << current().column << ": expected 'let' or 'mut', got "
+    std::cerr << "PARSER ERROR: Parser error at line " << current().line
+              << ", column " << current().column
+              << ": expected 'let' or 'mut', got "
               << tokenTypeName(current().type) << '\n';
     return nullptr;
   }
@@ -146,14 +166,17 @@ std::unique_ptr<Expression> Parser::parseAddition() {
 }
 
 std::unique_ptr<Expression> Parser::parseMultiplication() {
-  auto left = parsePrimary();
+  auto left = parseUnary();
+  ;
 
   while (current().type == TokenType::STAR ||
-         current().type == TokenType::SLASH) {
+         current().type == TokenType::SLASH ||
+         current().type == TokenType::SLASH_SLASH ||
+         current().type == TokenType::PERCENT) {
     TokenType op = current().type;
     advance();
 
-    auto right = parsePrimary();
+    auto right = parseUnary();
 
     auto expression = std::make_unique<BinaryExpression>();
 
@@ -167,7 +190,49 @@ std::unique_ptr<Expression> Parser::parseMultiplication() {
   return left;
 }
 
+std::unique_ptr<Expression> Parser::parseExponentiation() {
+  auto left = parsePostfix();
+
+  if (current().type != TokenType::STAR_STAR)
+    return left;
+
+  TokenType op = current().type;
+  advance();
+
+  auto right = parseUnary();
+
+  auto expression = std::make_unique<BinaryExpression>();
+
+  expression->left = std::move(left);
+  expression->right = std::move(right);
+  expression->operatorType = op;
+
+  return expression;
+}
+
+std::unique_ptr<Expression> Parser::parseUnary() {
+  if (current().type == TokenType::MINUS || current().type == TokenType::PLUS) {
+    TokenType op = current().type;
+    advance();
+
+    auto operand = parseUnary();
+
+    auto expression = std::make_unique<UnaryExpression>();
+
+    expression->operatorType = op;
+    expression->operand = std::move(operand);
+
+    return expression;
+  }
+
+  return parseExponentiation();
+}
+
 std::unique_ptr<Expression> Parser::parsePrimary() {
+
+  if (current().type == TokenType::LBRACKET) {
+    return parseArray();
+  }
 
   if (current().type == TokenType::STRING_LITERAL) {
     auto expression = std::make_unique<StringExpression>();
@@ -240,8 +305,11 @@ std::unique_ptr<Statement> Parser::parseStatement() {
   case TokenType::IDENTIFIER:
     return parseAssignment();
 
+  case TokenType::WHILE:
+    return parseWhileStatement();
+
   default:
-    throw std::runtime_error("Unexpected statement");
+    throw std::runtime_error("PARSER ERROR: Unexpected statement");
   }
 }
 
@@ -302,21 +370,44 @@ std::unique_ptr<Statement> Parser::parseWhileStatement() {
 }
 
 std::unique_ptr<Expression> Parser::parseArray() {
-  auto expression = std::make_unique<ArrayExpression>();
-
   expect(TokenType::LBRACKET);
 
-  while (current().type != TokenType::RBRACKET) {
-    expression->elements.push_back(parseExpression());
+  auto array = std::make_unique<ArrayExpression>();
 
-    if (current().type == TokenType::COMMA) {
-      advance();
-    } else if (current().type != TokenType::RBRACKET) {
-      throw std::runtime_error("Expected ',' or ']' in array literal");
-    }
+  if (current().type == TokenType::RBRACKET) {
+    advance();
+    return array;
+  }
+
+  array->elements.push_back(parseExpression());
+
+  while (current().type == TokenType::COMMA) {
+    advance();
+    array->elements.push_back(parseExpression());
   }
 
   expect(TokenType::RBRACKET);
+
+  return array;
+}
+
+std::unique_ptr<Expression> Parser::parsePostfix() {
+  auto expression = parsePrimary();
+
+  while (current().type == TokenType::LBRACKET) {
+    advance();
+
+    auto index = parseExpression();
+
+    expect(TokenType::RBRACKET);
+
+    auto indexed = std::make_unique<IndexExpression>();
+
+    indexed->object = std::move(expression);
+    indexed->index = std::move(index);
+
+    expression = std::move(indexed);
+  }
 
   return expression;
 }
@@ -337,7 +428,7 @@ Program Parser::parseProgram() {
       program.statements.push_back(parsePrint());
     } else {
       std::cout << tokenTypeName(current().type) << std::endl;
-      std::cerr << "Unexpected token\n";
+      std::cerr << "PARSER ERROR: Unexpected token\n";
       break;
     }
   }

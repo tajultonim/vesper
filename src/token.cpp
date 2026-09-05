@@ -47,6 +47,12 @@ std::string tokenTypeName(TokenType type) {
     return "STAR";
   case TokenType::SLASH:
     return "SLASH";
+  case TokenType::STAR_STAR:
+    return "STAR_STAR";
+  case TokenType::SLASH_SLASH:
+    return "SLASH_SLASH";
+  case TokenType::PERCENT:
+    return "PERCENT";
 
   case TokenType::LPAREN:
     return "LPAREN";

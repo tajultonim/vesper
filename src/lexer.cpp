@@ -56,6 +56,33 @@ Token Lexer::readString() {
   advance();
 
   while (current() != '"' && current() != '\0') {
+    if (current() == '\\') {
+      advance();
+
+      switch (current()) {
+      case 'n':
+        c += '\n';
+        break;
+
+      case 't':
+        c += '\t';
+        break;
+
+      case '\\':
+        c += '\\';
+        break;
+
+      case '"':
+        c += '"';
+        break;
+
+      default:
+        throw std::runtime_error("Unknown escape sequence");
+      }
+
+      advance();
+      continue;
+    }
     c += current();
     advance();
   }
@@ -155,10 +182,25 @@ std::vector<Token> Lexer::tokenize() {
       tokens.push_back(Token{TokenType::MINUS, "-", line, column});
       advance();
     } else if (c == '*') {
-      tokens.push_back(Token{TokenType::STAR, "*", line, column});
-      advance();
+      if (position + 1 < source.size() && source[position + 1] == '*') {
+        tokens.push_back(Token{TokenType::STAR_STAR, "**", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(Token{TokenType::STAR, "*", line, column});
+        advance();
+      }
     } else if (c == '/') {
-      tokens.push_back(Token{TokenType::SLASH, "/", line, column});
+      if (position + 1 < source.size() && source[position + 1] == '/') {
+        tokens.push_back(Token{TokenType::SLASH_SLASH, "//", line, column});
+        advance();
+        advance();
+      } else {
+        tokens.push_back(Token{TokenType::SLASH, "/", line, column});
+        advance();
+      }
+    } else if (c == '%') {
+      tokens.push_back(Token{TokenType::PERCENT, "%", line, column});
       advance();
     }
 
@@ -226,7 +268,7 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::BREAK, c, startLine, startColumn};
   }
 
-  else if (c == "int" || c == "bool" || c == "float") {
+  else if (c == "int" || c == "bool" || c == "float" || c == "string") {
     return Token{TokenType::TYPE, c, startLine, startColumn};
   } else if (c == "true") {
     return Token{TokenType::TRUE, c, startLine, startColumn};
