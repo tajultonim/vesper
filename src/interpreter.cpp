@@ -377,9 +377,9 @@ void Interpreter::executeStatement(const Statement *statement) {
           using T = std::decay_t<decltype(value)>;
 
           if constexpr (std::is_same_v<T, bool>)
-            std::cout << (value ? "true" : "false") << '\n';
+            std::cout << (value ? "true" : "false");
           else
-            std::cout << value << '\n';
+            std::cout << value;
         },
         value);
   } else {
