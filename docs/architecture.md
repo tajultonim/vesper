@@ -1,14 +1,8 @@
 ---
 layout: default
 title: Architecture
-permalink: /architecture/
+nav_order: 9
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Architecture
 
 ## Current pipeline
 
@@ -105,4 +99,4 @@ Vesper is deliberately staged: the interpreter is built first, as a simple and u
 
 At the same time, this pipeline is a lens into how language implementations work in general — syntax, lexing, parsing, the AST, the type system, interpretation, IR, optimization, and code generation, in that order. That's the underlying motivation for the project: understanding programming languages and compilers from the inside out, built from scratch in C++ rather than relying on a parser generator or compiler framework.
 
-See the [Roadmap](/roadmap/) for what's planned on top of this architecture, including scientific computing and HPC features like SIMD, multithreading, MPI, and GPU computing.
+See the [Roadmap](roadmap.html) for what's planned on top of this architecture, including scientific computing and HPC features like SIMD, multithreading, MPI, and GPU computing.

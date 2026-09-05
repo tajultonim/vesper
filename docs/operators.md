@@ -1,14 +1,8 @@
 ---
 layout: default
 title: Operators
-permalink: /operators/
+nav_order: 7
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Operators & other syntax
 
 ## Arithmetic
 

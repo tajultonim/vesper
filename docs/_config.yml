@@ -1,0 +1,63 @@
+title: Vesper
+description: >-
+  A small, expressive programming language designed for learning,
+  experimentation, and scientific computing.
+baseurl: "/vesper"     # the subpath of your site, e.g. "/vesper" for a project page
+url: ""                 # leave blank; GitHub Pages sets this automatically
+
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+# --- just-the-docs settings ---
+color_scheme: dark
+
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: false
+
+heading_anchors: true
+
+nav_sort: case_insensitive
+
+aux_links:
+  "Vesper on GitHub":
+    - "https://github.com/tajultonim/vesper"
+
+aux_links_new_tab: true
+
+footer_content: >-
+  Vesper is released under the <a href="https://github.com/tajultonim/vesper/blob/main/LICENSE">GPL-3.0 License</a>.
+  Built by <a href="https://github.com/tajultonim">Tajul Tonim</a>.
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+last_edit_timestamp: false
+
+callouts:
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+
+kramdown:
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor

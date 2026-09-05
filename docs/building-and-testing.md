@@ -1,18 +1,12 @@
 ---
 layout: default
-title: Building & Testing
-permalink: /building/
+title: Building and Testing
+nav_order: 3
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Building & Testing
 
 ## Building
 
-With the repository cloned (see [Installation](/installation/)), configure and build with CMake:
+With the repository cloned (see [Installation](installation.html)), configure and build with CMake:
 
 ```bash
 cmake -S . -B build
@@ -68,4 +62,4 @@ cmake --build build
 ctest --test-dir build
 ```
 
-If you're contributing changes, running the test suite — and formatting any `.vsp` examples you touch with `vspfmt` — before opening a pull request is a good habit. See [Contributing](/contributing/) for the full workflow.
+If you're contributing changes, running the test suite — and formatting any `.vsp` examples you touch with `vspfmt` — before opening a pull request is a good habit. See [Contributing](contributing.html) for the full workflow.

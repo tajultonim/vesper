@@ -1,16 +1,10 @@
 ---
 layout: default
 title: Installation
-permalink: /installation/
+nav_order: 2
 ---
 
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Installation
-
-Vesper is not yet distributed as a pre-built binary or package — you build it from source. This page covers what you need before building; see [Building & Testing](/building/) for the actual build steps.
+Vesper is not yet distributed as a pre-built binary or package — you build it from source. This page covers what you need before building; see [Building and Testing](building-and-testing.html) for the actual build steps.
 
 ## Prerequisites
 
@@ -32,4 +26,4 @@ There are no external library dependencies to install — the lexer, parser, AST
 
 ## Next step
 
-Once you have the prerequisites and the source, head to [Building & Testing](/building/) to compile Vesper and run your first program.
+Once you have the prerequisites and the source, head to [Building and Testing](building-and-testing.html) to compile Vesper and run your first program.

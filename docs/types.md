@@ -1,14 +1,8 @@
 ---
 layout: default
 title: Types
-permalink: /types/
+nav_order: 5
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Types
 
 ## Type annotations & inference
 
@@ -50,7 +44,7 @@ Beyond the primitives, Vesper's type system is **compositional**: array types ar
 [[[float]]]
 ```
 
-This is what lets Vesper express multidimensional data — matrices, nested lists, and so on — without a proliferation of special-cased types. See [Arrays](/arrays/) for how these types are used in practice.
+This is what lets Vesper express multidimensional data — matrices, nested lists, and so on — without a proliferation of special-cased types. See [Arrays](arrays.html) for how these types are used in practice.
 
 ## Static type checking
 

@@ -1,14 +1,8 @@
 ---
 layout: default
 title: Roadmap
-permalink: /roadmap/
+nav_order: 10
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Roadmap
 
 Vesper is still in its early stages and is being developed incrementally.
 
@@ -90,4 +84,4 @@ Vesper
       └── Native Compilation
 ```
 
-See [Architecture](/architecture/) for how the current interpreter-first pipeline is meant to evolve toward this, and [Contributing](/contributing/) if you'd like to help move any of these items forward.
+See [Architecture](architecture.html) for how the current interpreter-first pipeline is meant to evolve toward this, and [Contributing](contributing.html) if you'd like to help move any of these items forward.

@@ -1,25 +1,19 @@
 ---
 layout: default
 title: Contributing
-permalink: /contributing/
+nav_order: 11
 ---
 
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Contributing
-
-Vesper is an experimental, early-stage language, built as a learning project. Contributions are welcome, but because the language, type system, and architecture are still actively shifting (see the [Roadmap](/roadmap/)), it's worth checking in before investing time in anything large.
+Vesper is an experimental, early-stage language, built as a learning project. Contributions are welcome, but because the language, type system, and architecture are still actively shifting (see the [Roadmap](roadmap.html)), it's worth checking in before investing time in anything large.
 
 ## Before you start
 
 - **Small fixes** (typos, bugs, small formatter or lexer edge cases): feel free to open a pull request directly.
-- **Larger changes** (new syntax, new types, changes to the interpreter or type checker, compiler work): open an issue first to discuss the approach. This avoids duplicated effort and keeps changes aligned with where the [Architecture](/architecture/) and [Roadmap](/roadmap/) are heading.
+- **Larger changes** (new syntax, new types, changes to the interpreter or type checker, compiler work): open an issue first to discuss the approach. This avoids duplicated effort and keeps changes aligned with where the [Architecture](architecture.html) and [Roadmap](roadmap.html) are heading.
 
 ## Development setup
 
-Follow [Installation](/installation/) and [Building & Testing](/building/) to get a working build:
+Follow [Installation](installation.html) and [Building and Testing](building-and-testing.html) to get a working build:
 
 ```bash
 git clone https://github.com/tajultonim/vesper.git
@@ -68,8 +62,8 @@ Since Vesper's design is still taking shape, feature proposals are especially us
 
 - The problem the feature solves, ideally with a motivating example.
 - Proposed syntax, shown as `.vsp` code.
-- How it interacts with the existing type system (see [Types](/types/)) — does it introduce a new type, a new operator, new inference rules?
-- Where it fits on the [Roadmap](/roadmap/) — is this filling in an existing planned item, or something new?
+- How it interacts with the existing type system (see [Types](types.html)) — does it introduce a new type, a new operator, new inference rules?
+- Where it fits on the [Roadmap](roadmap.html) — is this filling in an existing planned item, or something new?
 
 ## Code of conduct
 

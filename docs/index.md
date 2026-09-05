@@ -1,15 +1,8 @@
 ---
 layout: default
-title: Vesper
-description: A small, expressive programming language for learning, experimentation, and scientific computing.
-permalink: /
+title: Home
+nav_order: 1
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Vesper
 
 > A small, expressive programming language designed for learning, experimentation, and scientific computing.
 
@@ -41,19 +34,15 @@ print(square(4.0), "\n");
 print(matrix[0][1]);
 ```
 
-Head to [Variables](/variables/), [Types](/types/), [Arrays](/arrays/), [Operators](/operators/), and [Functions](/functions/) for the full language tour, or jump straight to [Installation](/installation/) if you just want to run it.
-
----
+For the full language tour, see [Variables](variables.html), [Types](types.html), [Arrays](arrays.html), [Operators](operators.html), and [Functions](functions.html). To just run it, start with [Installation](installation.html).
 
 ## Where to go next
 
-- **New here?** Start with [Installation](/installation/), then [Building & Testing](/building/).
-- **Learning the language?** [Variables](/variables/) → [Types](/types/) → [Arrays](/arrays/) → [Operators](/operators/) → [Functions](/functions/), in that order.
-- **Curious how it's built?** See [Architecture](/architecture/) for the current and planned pipeline.
-- **Wondering what's next?** Check the [Roadmap](/roadmap/).
-- **Want to help?** Read [Contributing](/contributing/).
-
----
+- **New here?** Start with [Installation](installation.html), then [Building and Testing](building-and-testing.html).
+- **Learning the language?** [Variables](variables.html) → [Types](types.html) → [Arrays](arrays.html) → [Operators](operators.html) → [Functions](functions.html), in that order.
+- **Curious how it's built?** See [Architecture](architecture.html) for the current and planned pipeline.
+- **Wondering what's next?** Check the [Roadmap](roadmap.html).
+- **Want to help?** Read [Contributing](contributing.html).
 
 ## Built with
 
@@ -66,5 +55,3 @@ Vesper is released under the [GPL-3.0 License](https://github.com/tajultonim/ves
 ## Author
 
 Built by [Tajul Tonim](https://github.com/tajultonim), as an ongoing exploration of programming languages, compilers, numerical computing, and high-performance computing.
-
-[View the repository on GitHub →](https://github.com/tajultonim/vesper)

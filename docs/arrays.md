@@ -1,14 +1,8 @@
 ---
 layout: default
 title: Arrays
-permalink: /arrays/
+nav_order: 6
 ---
-
-**[Home](/) · [Installation](/installation/) · [Building & Testing](/building/) · [Variables](/variables/) · [Types](/types/) · [Arrays](/arrays/) · [Operators](/operators/) · [Functions](/functions/) · [Architecture](/architecture/) · [Roadmap](/roadmap/) · [Contributing](/contributing/)**
-
----
-
-# Arrays
 
 Arrays in Vesper are **homogeneous** — every element must share the same type — and can hold values of any supported type, including other arrays.
 
@@ -33,7 +27,7 @@ let matrix: [[int]] = [
 ];
 ```
 
-Because array types are compositional (see [Types](/types/)), this nesting is unbounded:
+Because array types are compositional (see [Types](types.html)), this nesting is unbounded:
 
 ```
 [int]
@@ -62,4 +56,4 @@ let matrix = [
 print(matrix[0][1]);
 ```
 
-Arrays and their element types are checked statically — see [Types](/types/) for how the type checker catches mismatched element types inside an array literal.
+Arrays and their element types are checked statically — see [Types](types.html) for how the type checker catches mismatched element types inside an array literal.
