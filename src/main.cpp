@@ -52,8 +52,6 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
-    printTokens(tokens);
-
     Parser parser(tokens);
 
     Program program = parser.parseProgram();
