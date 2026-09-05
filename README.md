@@ -19,7 +19,7 @@ Vesper is currently under active development.
 
 Variables are immutable by default. Use `mut` when mutation is required.
 
-```vesper
+```ts
 let name = "Vesper";
 let age: int = 20;
 
@@ -31,7 +31,7 @@ counter = counter + 1;
 
 Vesper supports optional type annotations and type inference.
 
-```vesper
+```ts
 let x: int = 42;
 let temperature: float = 36.5;
 let enabled: bool = true;
@@ -40,7 +40,7 @@ let message: string = "Hello";
 
 Types can be omitted when they can be inferred:
 
-```vesper
+```ts
 let x = 42;
 let temperature = 36.5;
 let message = "Hello";
@@ -65,7 +65,7 @@ string
 
 Arrays are homogeneous and can contain values of any supported type.
 
-```vesper
+```ts
 let numbers: [int] = [1, 2, 3, 4, 5];
 
 let names: [string] = [
@@ -77,7 +77,7 @@ let names: [string] = [
 
 Nested arrays are supported, allowing multidimensional data structures:
 
-```vesper
+```ts
 let matrix: [[int]] = [
     [1, 2, 3],
     [4, 5, 6]
@@ -98,7 +98,7 @@ Array types are compositional, so arbitrary nesting is possible:
 
 Arrays can be accessed using indexing.
 
-```vesper
+```ts
 let numbers = [10, 20, 30];
 
 print(numbers[0]);
@@ -106,7 +106,7 @@ print(numbers[0]);
 
 Indexing can also be chained for nested arrays:
 
-```vesper
+```ts
 let matrix = [
     [1, 2, 3],
     [4, 5, 6]
@@ -133,7 +133,7 @@ Vesper supports standard arithmetic operators as well as operators useful for nu
 
 Examples:
 
-```vesper
+```ts
 let a = 10 % 3;
 let b = 10 // 3;
 let c = 2 ** 10;
@@ -154,7 +154,7 @@ The corresponding remainder is:
 
 Exponentiation is right-associative:
 
-```vesper
+```ts
 2 ** 3 ** 2
 ```
 
@@ -170,7 +170,7 @@ is interpreted as:
 
 Vesper supports unary `+` and `-` for numeric values.
 
-```vesper
+```ts
 let x = -42;
 let y = +10;
 let z = -3.14;
@@ -178,7 +178,7 @@ let z = -3.14;
 
 Exponentiation follows mathematical precedence:
 
-```vesper
+```ts
 -2 ** 2
 ```
 
@@ -190,7 +190,7 @@ is interpreted as:
 
 while:
 
-```vesper
+```ts
 (-2) ** 2
 ```
 
@@ -206,7 +206,7 @@ is interpreted as:
 
 Vesper supports escape sequences in strings.
 
-```vesper
+```ts
 let message = "Hello\nWorld";
 let path = "C:\\Users\\Vesper";
 ```
@@ -219,7 +219,7 @@ Supported escape sequences are being expanded as the language develops.
 
 `print` supports multiple expressions in a single statement.
 
-```vesper
+```ts
 print("Value: ", 42, "\n");
 ```
 
@@ -227,7 +227,7 @@ Each expression is evaluated and written sequentially.
 
 `print` does **not** automatically append a newline. Newlines can be explicitly produced using string escape sequences:
 
-```vesper
+```ts
 print("Hello\n");
 print("World\n");
 ```
@@ -238,7 +238,7 @@ print("World\n");
 
 Vesper uses `#` for line comments.
 
-```vesper
+```ts
 # This is a comment
 
 let x = 10; # Inline comment
@@ -246,7 +246,7 @@ let x = 10; # Inline comment
 
 Block comments are also supported by the language tooling:
 
-```vesper
+```ts
 ##
 This is a block comment.
 ##
@@ -260,7 +260,7 @@ The use of `#` avoids a conflict with Vesper's floor-division operator `//`.
 
 Vesper uses a concise syntax with typed parameters and an optional typed return value.
 
-```vesper
+```ts
 fn square(x: float): float {
     x ** 2
 }
@@ -307,7 +307,7 @@ The type checker performs static validation before execution.
 
 For example:
 
-```vesper
+```ts
 let numbers: [int] = [1, 2, "three"];
 ```
 
