@@ -276,7 +276,9 @@ void TypeChecker::checkStatement(const Statement *statement) {
                  dynamic_cast<const AssignmentStatement *>(statement)) {
     checkAssignment(assignment);
   } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
-    checkExpression(print->value.get());
+    for (const auto &printValue : print->values) {
+      checkExpression(printValue.get());
+    }
   } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
     checkIfStatement(ifStatement);
   } else if (auto *whileStatement =

@@ -130,7 +130,7 @@ Value Interpreter::evaluate(const Expression *expression) {
                            identifier->column);
   }
 
-  if(auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
+  if (auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
     Value operandValue = evaluate(unary->operand.get());
 
     switch (unary->operatorType) {
@@ -210,7 +210,8 @@ Value Interpreter::evaluate(const Expression *expression) {
 
     case TokenType::STAR_STAR: {
       requireNumericOperands(left, right, "**");
-      if (valueTypeName(left) == "float" || valueTypeName(right) == "float"|| std::get<int>(right)<0) {
+      if (valueTypeName(left) == "float" || valueTypeName(right) == "float" ||
+          std::get<int>(right) < 0) {
         return performFloatArithmeticOperation(left, right,
                                                TokenType::STAR_STAR);
       }
@@ -370,18 +371,20 @@ void Interpreter::executeStatement(const Statement *statement) {
     }
 
   } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
-    Value value = evaluate(print->value.get());
+    for (const auto &expression : print->values) {
+      Value value = evaluate(expression.get());
 
-    std::visit(
-        [](auto &&value) {
-          using T = std::decay_t<decltype(value)>;
+      std::visit(
+          [](auto &&value) {
+            using T = std::decay_t<decltype(value)>;
 
-          if constexpr (std::is_same_v<T, bool>)
-            std::cout << (value ? "true" : "false");
-          else
-            std::cout << value;
-        },
-        value);
+            if constexpr (std::is_same_v<T, bool>)
+              std::cout << (value ? "true" : "false");
+            else
+              std::cout << value;
+          },
+          value);
+    }
   } else {
     throw std::runtime_error("RUNTIME_ERROR: Unknown statement");
   }

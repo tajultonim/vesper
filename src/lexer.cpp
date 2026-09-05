@@ -224,6 +224,12 @@ std::vector<Token> Lexer::tokenize() {
       advance();
     }
 
+    else if (current() == '#') {
+      while (current() != '\0' && current() != '\n')
+        advance();
+      continue;
+    }
+
     else {
       tokens.push_back(Token{TokenType::INVALID, std::string(1, c), 1,
                              static_cast<int>(position) + 1});

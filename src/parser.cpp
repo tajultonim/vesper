@@ -427,8 +427,9 @@ Program Parser::parseProgram() {
     } else if (current().type == TokenType::PRINT) {
       program.statements.push_back(parsePrint());
     } else {
-      std::cout << tokenTypeName(current().type) << std::endl;
-      std::cerr << "PARSER ERROR: Unexpected token\n";
+      std::cerr << "PARSER ERROR: Unexpected token\n at line " << current().line
+                << ", column " << current().column << ": "
+                << tokenTypeName(current().type) << '\n';
       break;
     }
   }
@@ -437,13 +438,14 @@ Program Parser::parseProgram() {
 }
 
 std::unique_ptr<Statement> Parser::parsePrint() {
-  auto statement = std::make_unique<PrintStatement>();
-
-  expect(TokenType::PRINT);
+  advance(); // print
   expect(TokenType::LPAREN);
-
-  statement->value = parseExpression();
-
+  auto statement = std::make_unique<PrintStatement>();
+  statement->values.push_back(parseExpression());
+  while (current().type == TokenType::COMMA) {
+    advance();
+    statement->values.push_back(parseExpression());
+  }
   expect(TokenType::RPAREN);
   expect(TokenType::SEMICOLON);
 

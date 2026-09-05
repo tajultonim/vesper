@@ -71,7 +71,7 @@ struct AssignmentStatement : Statement {
 };
 
 struct PrintStatement : Statement {
-  std::unique_ptr<Expression> value;
+   std::vector<std::unique_ptr<Expression>> values;
 };
 
 struct IfStatement : Statement {

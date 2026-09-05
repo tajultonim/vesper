@@ -66,6 +66,36 @@ std::string typeToString(const Type &type) {
   throw std::runtime_error("Unknown type");
 }
 
+std::string escapeString(const std::string &value) {
+  std::string result;
+
+  for (char c : value) {
+    switch (c) {
+    case '\n':
+      result += "\\n";
+      break;
+
+    case '\t':
+      result += "\\t";
+      break;
+
+    case '\\':
+      result += "\\\\";
+      break;
+
+    case '"':
+      result += "\\\"";
+      break;
+
+    default:
+      result += c;
+      break;
+    }
+  }
+
+  return result;
+}
+
 int Formatter::precedence(TokenType type) {
   switch (type) {
   case TokenType::EQUAL_EQUAL:
@@ -100,13 +130,22 @@ void Formatter::formatExpression(const Expression *expression,
                  dynamic_cast<const FloatExpression *>(expression)) {
     std::ostringstream stream;
     stream << floating->value;
-    output += stream.str();
+
+    std::string value = stream.str();
+
+    if (value.find('.') == std::string::npos &&
+        value.find('e') == std::string::npos &&
+        value.find('E') == std::string::npos) {
+      value += ".0";
+    }
+
+    output += value;
   } else if (auto *boolean =
                  dynamic_cast<const BooleanExpression *>(expression)) {
     output += boolean->value ? "true" : "false";
   } else if (auto *string =
                  dynamic_cast<const StringExpression *>(expression)) {
-    output += "\"" + string->value + "\"";
+    output += "\"" + escapeString(string->value) + "\"";
   } else if (auto *identifier =
                  dynamic_cast<const IdentifierExpression *>(expression)) {
     output += identifier->name;
@@ -121,8 +160,7 @@ void Formatter::formatExpression(const Expression *expression,
     }
 
     output += "]";
-  }
-  else if (auto *index = dynamic_cast<const IndexExpression *>(expression)) {
+  } else if (auto *index = dynamic_cast<const IndexExpression *>(expression)) {
     formatExpression(index->object.get());
     output += "[";
     formatExpression(index->index.get());
@@ -188,7 +226,12 @@ void Formatter::formatStatement(const Statement *statement) {
 
     output += "print(";
 
-    formatExpression(print->value.get());
+    for (std::size_t i = 0; i < print->values.size(); ++i) {
+      if (i > 0)
+        output += ", ";
+
+      formatExpression(print->values[i].get());
+    }
 
     output += ");\n";
   } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
