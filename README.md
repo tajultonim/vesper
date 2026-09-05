@@ -5,7 +5,7 @@
 
 > A small, expressive programming language designed for learning, experimentation, and scientific computing.
 
-**Vesper** is a programming language I'm building from scratch in C++. The project started as an exploration of how programming languages work internally—from lexing and parsing to type checking and interpretation, with compilation and native code generation planned for the future.
+**Vesper** is a programming language I'm building from scratch in C++. The project started as an exploration of how programming languages work internally-from lexing and parsing to type checking and interpretation, with compilation and native code generation planned for the future.
 
 The long-term goal is to evolve Vesper into a language particularly suited for **scientific computing and high-performance computing (HPC)** while keeping the language simple, expressive, and easy to understand.
 
@@ -396,8 +396,8 @@ Vesper is currently implemented in **C++17**.
 
 ### Developer Tools
 
-* `vspfmt` — Vesper source formatter
-* CTest — automated testing
+* `vspfmt` - Vesper source formatter
+* CTest - automated testing
 
 ---
 
