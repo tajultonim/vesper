@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-icon.svg" width="70"/><br/>
+    <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-animated.svg" width="70"/><br/>
     VESPER
 </h1>
 
