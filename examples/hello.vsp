@@ -1,0 +1,13 @@
+let v_i = 300;
+let g = 9.81;
+mut t = 0;
+print("Time (s) | Velocity (m/s) | Position (m)\n");
+while (t <= 70) {
+    let v = v_i - g * t;
+    mut h: float = v_i * t - 0.5 * g * t ** 2;
+    if (h < 0) {
+        h = 0.0;
+    }
+    print(t, " | ", v, " | ", h, "\n");
+    t = t + 1;
+}

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -38,7 +39,11 @@ std::string operatorToString(TokenType type) {
   case TokenType::GREATER:
     return ">";
 
-    // ...
+  case TokenType::LESS_EQUAL:
+    return "<=";
+    
+  case TokenType::GREATER_EQUAL:
+    return ">=";
 
   default:
     throw std::runtime_error("Unknown operator");
