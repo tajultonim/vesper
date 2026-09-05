@@ -246,17 +246,17 @@ Vesper is currently implemented in **C++17**.
 
 ### Core
 
-* C++17
-* CMake
-* MinGW / GCC
+- C++17
+- CMake
+- MinGW / GCC
 
 ### Compiler Components
 
-* Hand-written lexer
-* Recursive-descent parser
-* Abstract Syntax Tree (AST)
-* Static type checker
-* Tree-walking interpreter
+- Hand-written lexer
+- Recursive-descent parser
+- Abstract Syntax Tree (AST)
+- Static type checker
+- Tree-walking interpreter
 
 ---
 
@@ -354,42 +354,42 @@ Vesper is still in its early stages.
 
 ### Language
 
-* [x] Variables
-* [x] Mutable variables
-* [x] Type annotations
-* [x] Type inference
-* [x] Primitive types
-* [x] Arrays
-* [x] Nested arrays
-* [x] Array indexing
-* [x] Arithmetic operators
-* [x] Floor division
-* [x] Exponentiation
-* [x] Unary operators
-* [x] Static type checking
-* [ ] Functions
-* [ ] Function calls
-* [ ] Explicit `return`
-* [ ] `for` loops
-* [ ] `range`
-* [ ] Tuples
-* [ ] Slicing
-* [ ] Structs
-* [ ] Pattern matching
-* [ ] Generics
-* [ ] Standard library
+- [x] Variables
+- [x] Mutable variables
+- [x] Type annotations
+- [x] Type inference
+- [x] Primitive types
+- [x] Arrays
+- [x] Nested arrays
+- [x] Array indexing
+- [x] Arithmetic operators
+- [x] Floor division
+- [x] Exponentiation
+- [x] Unary operators
+- [x] Static type checking
+- [ ] Functions
+- [ ] Function calls
+- [ ] Explicit `return`
+- [ ] `for` loops
+- [ ] `range`
+- [ ] Tuples
+- [ ] Slicing
+- [ ] Structs
+- [ ] Pattern matching
+- [ ] Generics
+- [ ] Standard library
 
 ### Compiler
 
-* [ ] Intermediate representation
-* [ ] IR interpreter
-* [ ] Constant folding
-* [ ] Basic optimizations
-* [ ] Native code generation
-* [ ] RISC-V backend
-* [ ] LLVM backend
-* [ ] AOT compilation
-* [ ] JIT compilation
+- [ ] Intermediate representation
+- [ ] IR interpreter
+- [ ] Constant folding
+- [ ] Basic optimizations
+- [ ] Native code generation
+- [ ] RISC-V backend
+- [ ] LLVM backend
+- [ ] AOT compilation
+- [ ] JIT compilation
 
 ### Scientific Computing
 
@@ -397,15 +397,15 @@ The long-term goal is to make Vesper useful for numerical and scientific workloa
 
 Planned areas include:
 
-* [ ] Matrix types
-* [ ] Tensor types
-* [ ] Linear algebra
-* [ ] Numerical methods
-* [ ] Scientific standard library
-* [ ] SIMD/vectorization
-* [ ] Parallel computing
-* [ ] MPI support
-* [ ] GPU computing
+- [ ] Matrix types
+- [ ] Tensor types
+- [ ] Linear algebra
+- [ ] Numerical methods
+- [ ] Scientific standard library
+- [ ] SIMD/vectorization
+- [ ] Parallel computing
+- [ ] MPI support
+- [ ] GPU computing
 
 ---
 
