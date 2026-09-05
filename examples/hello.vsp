@@ -1,1 +1,15 @@
-let numbers = [1, 2, 3];
+let v: int = 300;
+let g = 9.8;
+mut t = 0;
+
+while (t < 32 ){
+    mut h = v * t - 0.5 * g * t * t;
+    if (h < 0 ){
+        print("ik");
+    } else {
+        print("ok");
+    }
+    print(t);
+    print(h);
+    t = t + 1;
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="100%" height="100%">
+  <!-- Central Bold Vesper Star -->
+  <path d="M 8,0 
+           C 8,5 11,8 16,8 
+           C 11,8 8,11 8,16 
+           C 8,11 5,8 0,8 
+           C 5,8 8,5 8,0 Z" 
+        fill="#89B4FA"/>
+
+  <!-- Small high-contrast central core for focal clarity -->
+  <circle cx="8" cy="8" r="1.5" fill="#FFFFFF"/>
+</svg>

@@ -1,4 +1,4 @@
-# Vesper
+# <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-icon.svg"/> Vesper
 
 > A small programming language and interpreter built from scratch in C++.
 

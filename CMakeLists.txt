@@ -16,6 +16,15 @@ add_executable(vesper
     src/token.cpp
 )
 
+add_executable(vspfmt
+    tools/vspfmt.cpp
+    src/lexer.cpp
+    src/parser.cpp
+    src/ast.cpp
+    src/formatter.cpp
+    src/token.cpp
+)
+
 enable_testing()
 
 add_executable(type_checker_test
