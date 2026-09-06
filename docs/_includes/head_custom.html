@@ -21,7 +21,10 @@
     },
     keyword: /\b(?:fn|let|mut|if|else|while|return|struct|import|for)\b/,
     boolean: /\b(?:true|false)\b/,
-    type: /\[*\b(?:int|float|string|bool)\b\]*/,
+    type: {
+      pattern: /\[*\b(?:int|float|string|bool)\b\]*/,
+      alias: "class-name",
+    },
     number: /\b0x[\da-f]+\b|\b\d+(?:\.\d+)?\b/i,
     operator: /\/\ collision|\*\*|\/\/|==|!=|<=|>=|[-+*\/%<>=]/,
     punctuation: /[{}[\];(),.:]/,
