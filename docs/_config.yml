@@ -2,8 +2,8 @@ title: Vesper
 description: >-
   A small, expressive programming language designed for learning,
   experimentation, and scientific computing.
-baseurl: "/vesper"     # the subpath of your site, e.g. "/vesper" for a project page
-url: ""                 # leave blank; GitHub Pages sets this automatically
+baseurl: "/vesper" # the subpath of your site, e.g. "/vesper" for a project page
+url: "" # leave blank; GitHub Pages sets this automatically
 
 remote_theme: just-the-docs/just-the-docs
 
