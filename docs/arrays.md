@@ -6,7 +6,7 @@ nav_order: 6
 
 Arrays in Vesper are **homogeneous** — every element must share the same type — and can hold values of any supported type, including other arrays.
 
-```ts
+```vesper
 let numbers: [int] = [1, 2, 3, 4, 5];
 
 let names: [string] = [
@@ -20,7 +20,7 @@ let names: [string] = [
 
 Arrays can nest to represent multidimensional data, such as matrices:
 
-```ts
+```vesper
 let matrix: [[int]] = [
     [1, 2, 3],
     [4, 5, 6]
@@ -39,7 +39,7 @@ Because array types are compositional (see [Types](types.html)), this nesting is
 
 Arrays support indexing with `[...]`:
 
-```ts
+```vesper
 let numbers = [10, 20, 30];
 
 print(numbers[0]);
@@ -47,7 +47,7 @@ print(numbers[0]);
 
 Indexing chains naturally for nested arrays:
 
-```ts
+```vesper
 let matrix = [
     [1, 2, 3],
     [4, 5, 6]

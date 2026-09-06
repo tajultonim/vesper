@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script>
+  Prism.languages.vesper = {
+    'comment': /\/\/.*/,
+    'string': {
+      pattern: /(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,
+      greedy: true
+    },
+    'keyword': /\b(?:fn|let|if|else|while|return|struct|import|for)\b/,
+    'boolean': /\b(?:true|false)\b/,
+    'number': /\b0x[\da-f]+\b|\b\d+(?:\.\d+)?\b/i,
+    'operator': /[-+*\/=><!%&|^]+/,
+    'punctuation': /[{}[\];(),.:]/
+  };
+</script>
