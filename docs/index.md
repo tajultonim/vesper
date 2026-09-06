@@ -5,7 +5,7 @@ nav_order: 1
 ---
 
 <h1 align="center">
-    <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-animated.svg" width="70"/><br/>
+    <img src="https://raw.githubusercontent.com/tajultonim/vesper/refs/heads/main/icons/vesper-animated.svg" width="90"/><br/>
     VESPER
 </h1>
 
