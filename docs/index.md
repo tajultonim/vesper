@@ -4,6 +4,11 @@ title: Home
 nav_order: 1
 ---
 
+<h1 align="center">
+    <img src="https://github.com/tajultonim/vesper/blob/main/icons/vesper-animated.svg" width="70"/><br/>
+    VESPER
+</h1>
+
 > A small, expressive programming language designed for learning, experimentation, and scientific computing.
 
 Vesper is a programming language built from scratch in C++17. It started as an exploration of how programming languages work internally — lexing, parsing, type checking, interpretation — with compilation and native code generation planned for the future.

@@ -225,8 +225,25 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     else if (current() == '#') {
-      while (current() != '\0' && current() != '\n')
+      if (position + 1 < source.size() && source[position + 1] == '#') {
         advance();
+        advance();
+        while (current() != '\0') {
+          if (current() == '#' && position + 1 < source.size() &&
+              source[position + 1] == '#') {
+            advance();
+            advance();
+            break;
+          }
+          advance();
+        }
+
+        continue;
+      }
+
+      while (current() != '\0' && current() != '\n') {
+        advance();
+      }
       continue;
     }
 

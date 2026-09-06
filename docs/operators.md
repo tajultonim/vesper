@@ -8,15 +8,15 @@ nav_order: 7
 
 Alongside the standard operators, Vesper includes a few aimed squarely at numerical work:
 
-```
-+     Addition
--     Subtraction
-*     Multiplication
-/     Division
-%     Remainder
-//    Floor division
-**    Exponentiation
-```
+| Operator | Name           | Example        | Result |
+| :------: | :------------- | :------------- | :----- |
+|    +     | Addition       | `let a=5+2;`   | `7`    |
+|    -     | Subtraction    | `let b =5-2`   | `3`    |
+|    \*    | Multiplication | `let c=5*2`    | `10`   |
+|    /     | division       | `let d= 5.2/2` | `2.5`  |
+|    %     | Reminder       | `let e=5%2`    | `1`    |
+|    //    | Floor division | `let f=5//2`   | `2`    |
+|   \*\*   | Exponentiation | `let g=5\*\*2` | `25`   |
 
 ```vesper
 let a = 10 % 3;

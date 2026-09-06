@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
 
@@ -47,17 +48,7 @@ int performIntegerArithmeticOperation(const Value &left, const Value &right,
     return leftInt - rightInt;
   case TokenType::STAR:
     return leftInt * rightInt;
-  case TokenType::SLASH:
-    if (rightInt == 0) {
-      throw std::runtime_error("RUNTIME ERROR: Division by zero");
-    }
-    return leftInt / rightInt;
-  case TokenType::SLASH_SLASH: {
-    if (rightInt == 0) {
-      throw std::runtime_error("RUNTIME ERROR: Division by zero");
-    }
-    return leftInt / rightInt;
-  }
+
   case TokenType::PERCENT: {
     if (rightInt == 0)
       throw std::runtime_error("RUNTIME ERROR: Division by zero");
@@ -90,13 +81,13 @@ float performFloatArithmeticOperation(const Value &left, const Value &right,
     return leftFloat - rightFloat;
   case TokenType::STAR:
     return leftFloat * rightFloat;
+  case TokenType::STAR_STAR:
+    return std::pow(leftFloat, rightFloat);
   case TokenType::SLASH:
     if (rightFloat == 0.0) {
       throw std::runtime_error("RUNTIME ERROR: Division by zero");
     }
     return leftFloat / rightFloat;
-  case TokenType::STAR_STAR:
-    return std::pow(leftFloat, rightFloat);
 
   default:
     throw std::runtime_error("RUNTIME ERROR: Unknown binary operator");
@@ -201,11 +192,7 @@ Value Interpreter::evaluate(const Expression *expression) {
     }
 
     case TokenType::SLASH: {
-      requireNumericOperands(left, right, "/");
-      if (valueTypeName(left) == "float" || valueTypeName(right) == "float") {
-        return performFloatArithmeticOperation(left, right, TokenType::SLASH);
-      }
-      return performIntegerArithmeticOperation(left, right, TokenType::SLASH);
+      return performFloatArithmeticOperation(left, right, TokenType::SLASH);
     }
 
     case TokenType::STAR_STAR: {
@@ -220,9 +207,11 @@ Value Interpreter::evaluate(const Expression *expression) {
     }
 
     case TokenType::SLASH_SLASH: {
-      requireNumericOperands(left, right, "//");
-      return performIntegerArithmeticOperation(left, right,
-                                               TokenType::SLASH_SLASH);
+      if (getNumericFloat(right) == 0.0) {
+        throw std::runtime_error("RUNTIME ERROR: Division by zero");
+      }
+
+      return static_cast<int>(getNumericFloat(left) / getNumericFloat(right));
     }
 
     case TokenType::PERCENT: {
@@ -380,7 +369,20 @@ void Interpreter::executeStatement(const Statement *statement) {
 
             if constexpr (std::is_same_v<T, bool>)
               std::cout << (value ? "true" : "false");
-            else
+            else if constexpr (std::is_same_v<T, double>) {
+              std::ostringstream stream;
+              stream << value;
+
+              std::string output = stream.str();
+
+              if (output.find('.') == std::string::npos &&
+                  output.find('e') == std::string::npos &&
+                  output.find('E') == std::string::npos) {
+                output += ".0";
+              }
+
+              std::cout << output;
+            } else
               std::cout << value;
           },
           value);

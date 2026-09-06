@@ -159,12 +159,7 @@ Type TypeChecker::checkExpression(const Expression *expression) {
     case TokenType::SLASH:
 
       requireNumericOperands(left.kind, right.kind, "/");
-
-      if (left.kind == Type::Kind::FLOAT || right.kind == Type::Kind::FLOAT) {
-        return Type(Type::Kind::FLOAT);
-      }
-
-      return Type(Type::Kind::INT);
+      return Type(Type::Kind::FLOAT);
 
     case TokenType::LESS:
 
@@ -173,9 +168,7 @@ Type TypeChecker::checkExpression(const Expression *expression) {
       return Type(Type::Kind::BOOL);
 
     case TokenType::LESS_EQUAL:
-
       requireNumericOperands(left.kind, right.kind, "<=");
-
       return Type(Type::Kind::BOOL);
 
     case TokenType::GREATER:
