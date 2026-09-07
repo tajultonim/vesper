@@ -1,8 +1,6 @@
 ---
-
 layout: default
 title: While Loop
-parent: Language
 nav_order: 7
 ------------
 
