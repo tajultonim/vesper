@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Functions
-nav_order: 8
+nav_order: 9
 ---
 
 Vesper uses a concise function syntax with typed parameters and an optional typed return value:

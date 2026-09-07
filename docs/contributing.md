@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Contributing
-nav_order: 11
+nav_order: 12
 ---
 
 Vesper is an experimental, early-stage language, built as a learning project. Contributions are welcome, but because the language, type system, and architecture are still actively shifting (see the [Roadmap](roadmap.html)), it's worth checking in before investing time in anything large.
