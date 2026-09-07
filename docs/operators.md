@@ -69,6 +69,17 @@ is interpreted as `-(2 ** 2)`, while:
 
 is `4`.
 
+## Comparison
+
+| Operator | Name                     | Example  | Result |
+| :------: | :----------------------- | :------- | :----- |
+|    ==    | Equal to                 | `5 == 5` | `true` |
+|    !=    | Not equal to             | `5 != 3` | `true` |
+|    <     | Less than                | `3 < 5`  | `true` |
+|    <=    | Less than or equal to    | `3 <= 3` | `true` |
+|    >     | Greater than             | `5 > 3`  | `true` |
+|    >=    | Greater than or equal to | `5 >= 5` | `true` |
+
 ## Strings & escape sequences
 
 Strings support escape sequences:
