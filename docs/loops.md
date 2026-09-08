@@ -2,7 +2,7 @@
 layout: default
 title: While Loop
 nav_order: 7
-------------
+---
 
 # While Loop
 
