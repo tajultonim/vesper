@@ -362,61 +362,7 @@ std::unique_ptr<Statement> Parser::handleIdentifier() {
   if (peek().type == TokenType::EQUAL)
     return parseAssignment();
 
-  // Parse the identifier first
-  auto callee = std::make_unique<IdentifierExpression>();
-
-  callee->name = current().value;
-  callee->line = current().line;
-  callee->column = current().column;
-
-  advance();
-
-  // Function call
-  if (current().type == TokenType::LPAREN) {
-    auto statement = std::make_unique<ExpressionStatement>();
-    statement->line = current().line;
-
-    statement->column = current().column;
-
-    statement->expression = parseCall(std::move(callee));
-
-    expect(TokenType::SEMICOLON);
-
-    return statement;
-  }
-
-  throw std::runtime_error(
-      "PARSER ERROR: Unexpected token after identifier at line " +
-      std::to_string(current().line) + ", column " +
-      std::to_string(current().column));
-}
-
-std::unique_ptr<Expression>
-Parser::parseCall(std::unique_ptr<Expression> callee) {
-  auto call = std::make_unique<CallExpression>();
-
-  call->callee = std::move(callee);
-
-  expect(TokenType::LPAREN);
-
-  // No arguments
-  if (current().type == TokenType::RPAREN) {
-    advance();
-    return call;
-  }
-
-  while (true) {
-    call->arguments.push_back(parseExpression());
-
-    if (current().type != TokenType::COMMA)
-      break;
-
-    advance();
-  }
-
-  expect(TokenType::RPAREN);
-
-  return call;
+  return parseExpressionStatement();
 }
 
 std::unique_ptr<Statement> Parser::parseExpressionStatement() {
@@ -552,15 +498,27 @@ std::unique_ptr<Expression> Parser::parsePostfix() {
       indexed->index = std::move(index);
 
       expression = std::move(indexed);
+
       continue;
     }
 
     // Member access: foo.bar
     if (current().type == TokenType::DOT) {
       advance(); // consume '.'
-      auto member = std::make_unique<MemberExpression>(std::move(expression),                                             current().value);
+
+      Token member = current();
+
       expect(TokenType::IDENTIFIER);
-      expression = std::move(member);
+
+      auto memberExpression = std::make_unique<MemberExpression>(
+          std::move(expression), member.value);
+
+      memberExpression->line = member.line;
+      memberExpression->column = member.column;
+
+      expression = std::move(memberExpression);
+
+      continue;
     }
 
     break;
@@ -568,6 +526,7 @@ std::unique_ptr<Expression> Parser::parsePostfix() {
 
   return expression;
 }
+
 std::unique_ptr<Statement> Parser::parseFunction() {
   int line = current().line;
   int column = current().column;

@@ -6,11 +6,13 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 
 #include "interpreter.hpp"
 #include "lexer.hpp"
+#include "module.hpp"
 #include "parser.hpp"
-#include "type_checker.hpp"
 #include "token.hpp"
+#include "type_checker.hpp"
 
 int main(int argc, char *argv[]) {
+
   try {
     if (argc != 2) {
       std::cerr << "Usage: vesper <file.vsp>\n"
@@ -37,7 +39,10 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
-    std::ifstream file(argument);
+    std::filesystem::path sourcePath = argument;
+    std::filesystem::path rootPath = sourcePath.parent_path();
+
+    std::ifstream file(sourcePath);
 
     if (!file) {
       std::cerr << "Could not open file: " << argument << '\n';
@@ -57,6 +62,17 @@ int main(int argc, char *argv[]) {
     Parser parser(tokens);
 
     Program program = parser.parseProgram();
+    ModuleLoader loader(sourcePath.parent_path());
+    for (const auto &statement : program.statements) {
+      if (const auto *import =
+              dynamic_cast<const ImportStatement *>(statement.get())) {
+        Module module = loader.load(import->path);
+
+        // For now, just verify it loaded.
+        std::cout << "Loaded module: " << import->path << " as "
+                  << import->alias << '\n';
+      }
+    }
 
     TypeChecker checker;
     checker.checkProgram(program);

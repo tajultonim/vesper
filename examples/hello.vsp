@@ -1,4 +1,4 @@
-import "math" as math;
+import "math" as m;
 
 let name: string = input("What is your name? ");
 
@@ -6,4 +6,5 @@ export fn greet(name: string): void {
     print("Hello, " + name + "!");
 }
 
+m.square(5.0);
 greet(name);

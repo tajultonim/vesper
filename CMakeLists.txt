@@ -14,6 +14,7 @@ add_executable(vesper
     src/interpreter.cpp
     src/type_checker.cpp
     src/token.cpp
+    src/module.cpp
 )
 
 add_executable(vspfmt
