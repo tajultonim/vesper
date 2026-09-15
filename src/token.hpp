@@ -10,6 +10,8 @@ enum class TokenType {
   MUT,
   PRINT,
   IDENTIFIER,
+  FN,
+  RETURN,
 
   TYPE,
 

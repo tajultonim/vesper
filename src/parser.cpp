@@ -5,6 +5,7 @@
 Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
 
 Token Parser::current() const { return tokens[position]; }
+Token Parser::peek() const { return tokens[position + 1]; }
 
 void Parser::advance() {
   if (position < tokens.size()) {
@@ -296,6 +297,11 @@ std::unique_ptr<Statement> Parser::parseStatement() {
   case TokenType::MUT:
     return parseDeclaration();
 
+  case TokenType::FN:
+    return parseFunction();
+  case TokenType::RETURN:
+    return parseReturn();
+
   case TokenType::PRINT:
     return parsePrint();
 
@@ -303,14 +309,90 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     return parseIfStatement();
 
   case TokenType::IDENTIFIER:
-    return parseAssignment();
+    return handleIdentifier();
 
   case TokenType::WHILE:
     return parseWhileStatement();
 
+  case TokenType::STRING_LITERAL:
+  case TokenType::INTEGER_LITERAL:
+  case TokenType::FLOAT_LITERAL:
+  case TokenType::TRUE:
+  case TokenType::FALSE:
+    return parseExpressionStatement();
+
   default:
-    throw std::runtime_error("PARSER ERROR: Unexpected statement");
+    std::cout << tokenTypeName(current().type) << std::endl;
+    throw std::runtime_error("PARSER ERROR: Unexpected statement at line " +
+                             std::to_string(current().line) + ", column " +
+                             std::to_string(current().column));
   }
+}
+
+std::unique_ptr<Statement> Parser::handleIdentifier() {
+  if (peek().type == TokenType::EQUAL)
+    return parseAssignment();
+
+  // Parse the identifier first
+  auto callee = std::make_unique<IdentifierExpression>();
+
+  callee->name = current().value;
+  callee->line = current().line;
+  callee->column = current().column;
+
+  advance();
+
+  // Function call
+  if (current().type == TokenType::LPAREN) {
+    auto statement = std::make_unique<ExpressionStatement>();
+
+    statement->expression = parseCall(std::move(callee));
+
+    expect(TokenType::SEMICOLON);
+
+    return statement;
+  }
+
+  throw std::runtime_error(
+      "PARSER ERROR: Unexpected token after identifier at line " +
+      std::to_string(current().line) + ", column " +
+      std::to_string(current().column));
+}
+
+std::unique_ptr<Expression>
+Parser::parseCall(std::unique_ptr<Expression> callee) {
+  auto call = std::make_unique<CallExpression>();
+
+  call->callee = std::move(callee);
+
+  expect(TokenType::LPAREN);
+
+  // No arguments
+  if (current().type == TokenType::RPAREN) {
+    advance();
+    return call;
+  }
+
+  // Arguments
+  while (true) {
+    call->arguments.push_back(parseExpression());
+
+    if (current().type != TokenType::COMMA)
+      break;
+
+    advance(); // consume ','
+  }
+
+  expect(TokenType::RPAREN);
+
+  return call;
+}
+
+std::unique_ptr<Statement> Parser::parseExpressionStatement() {
+  auto statement = std::make_unique<ExpressionStatement>();
+  statement->expression = parseExpression();
+  expect(TokenType::SEMICOLON);
+  return statement;
 }
 
 std::unique_ptr<Statement> Parser::parseIfStatement() {
@@ -394,44 +476,141 @@ std::unique_ptr<Expression> Parser::parseArray() {
 std::unique_ptr<Expression> Parser::parsePostfix() {
   auto expression = parsePrimary();
 
-  while (current().type == TokenType::LBRACKET) {
-    advance();
+  while (true) {
+    // Function call: foo(...)
+    if (current().type == TokenType::LPAREN) {
+      advance(); // consume '('
 
-    auto index = parseExpression();
+      auto call = std::make_unique<CallExpression>();
+      call->callee = std::move(expression);
 
-    expect(TokenType::RBRACKET);
+      if (current().type != TokenType::RPAREN) {
+        while (true) {
+          call->arguments.push_back(parseExpression());
 
-    auto indexed = std::make_unique<IndexExpression>();
+          if (current().type != TokenType::COMMA)
+            break;
 
-    indexed->object = std::move(expression);
-    indexed->index = std::move(index);
+          advance(); // consume ','
+        }
+      }
 
-    expression = std::move(indexed);
+      expect(TokenType::RPAREN);
+
+      expression = std::move(call);
+      continue;
+    }
+
+    // Array indexing: foo[index]
+    if (current().type == TokenType::LBRACKET) {
+      advance(); // consume '['
+
+      auto index = parseExpression();
+
+      expect(TokenType::RBRACKET);
+
+      auto indexed = std::make_unique<IndexExpression>();
+
+      indexed->object = std::move(expression);
+      indexed->index = std::move(index);
+
+      expression = std::move(indexed);
+      continue;
+    }
+
+    break;
   }
 
   return expression;
+}
+std::unique_ptr<Statement> Parser::parseFunction() {
+  advance(); // consume 'fn'
+
+  // Function name
+  std::string name = current().value;
+  expect(TokenType::IDENTIFIER);
+
+  // Parameters
+  expect(TokenType::LPAREN);
+
+  std::vector<FunctionStatement::Parameter> parameters;
+
+  if (current().type != TokenType::RPAREN) {
+    while (true) {
+      // Parameter name
+      std::string parameterName = current().value;
+      expect(TokenType::IDENTIFIER);
+
+      // :
+      expect(TokenType::COLON);
+
+      // Parameter type
+      Type parameterType = parseType();
+
+      FunctionStatement::Parameter parameter{parameterName,
+                                             std::move(parameterType), nullptr};
+
+      // Optional default value
+      if (current().type == TokenType::EQUAL) {
+        advance(); // consume '='
+        parameter.defaultValue = parseExpression();
+      }
+
+      parameters.push_back(std::move(parameter));
+
+      if (current().type != TokenType::COMMA)
+        break;
+
+      advance(); // consume ','
+    }
+  }
+
+  expect(TokenType::RPAREN);
+
+  // :
+  expect(TokenType::COLON);
+
+  // Return type
+  Type returnType = parseType();
+
+  // Construct FunctionStatement
+  auto function = std::make_unique<FunctionStatement>(
+      std::move(name), std::move(parameters), std::move(returnType));
+
+  // Function body
+  expect(TokenType::LBRACE);
+
+  while (current().type != TokenType::RBRACE) {
+    if (current().type == TokenType::END_OF_FILE) {
+      throw std::runtime_error("PARSER ERROR: Expected '}' before end of file");
+    }
+
+    function->body.push_back(parseStatement());
+  }
+
+  expect(TokenType::RBRACE);
+
+  return function;
+}
+
+std::unique_ptr<Statement> Parser::parseReturn()
+{
+    expect(TokenType::RETURN);
+
+    auto statement = std::make_unique<ReturnStatement>();
+
+    statement->value = parseExpression();
+
+    expect(TokenType::SEMICOLON);
+
+    return statement;
 }
 
 Program Parser::parseProgram() {
   Program program;
 
   while (current().type != TokenType::END_OF_FILE) {
-    if (current().type == TokenType::LET || current().type == TokenType::MUT) {
-      program.statements.push_back(parseDeclaration());
-    } else if (current().type == TokenType::IF) {
-      program.statements.push_back(parseIfStatement());
-    } else if (current().type == TokenType::WHILE) {
-      program.statements.push_back(parseWhileStatement());
-    } else if (current().type == TokenType::IDENTIFIER) {
-      program.statements.push_back(parseAssignment());
-    } else if (current().type == TokenType::PRINT) {
-      program.statements.push_back(parsePrint());
-    } else {
-      std::cerr << "PARSER ERROR: Unexpected token\n at line " << current().line
-                << ", column " << current().column << ": "
-                << tokenTypeName(current().type) << '\n';
-      break;
-    }
+    program.statements.push_back(parseStatement());
   }
 
   return program;

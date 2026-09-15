@@ -105,6 +105,71 @@ void requireNumericOperands(const Value &left, const Value &right,
   }
 }
 
+Value Interpreter::evaluateCall(const CallExpression *call) {
+  Value callee = evaluate(call->callee.get());
+
+  if (!std::holds_alternative<std::shared_ptr<Function>>(callee)) {
+    throw std::runtime_error("Expression is not callable");
+  }
+
+  auto function = std::get<std::shared_ptr<Function>>(callee);
+
+  FunctionStatement *declaration = function->declaration;
+
+  const auto &parameters = declaration->parameters;
+
+  const auto &arguments = call->arguments;
+
+  if (arguments.size() > parameters.size()) {
+    throw std::runtime_error("Too many arguments in function call");
+  }
+
+  // Evaluate arguments in the caller's environment.
+  std::vector<Value> argumentValues;
+
+  for (const auto &argument : arguments) {
+    argumentValues.push_back(evaluate(argument.get()));
+  }
+
+  auto previousEnvironment = environment;
+
+  // Create function-local environment
+  // with the caller's environment as its parent.
+  environment = std::make_shared<Environment>(previousEnvironment);
+
+  try {
+    // Bind parameters.
+    for (std::size_t i = 0; i < parameters.size(); ++i) {
+      const auto &parameter = parameters[i];
+
+      Value value;
+
+      if (i < argumentValues.size()) {
+        value = std::move(argumentValues[i]);
+      } else if (parameter.defaultValue) {
+        value = evaluate(parameter.defaultValue.get());
+      } else {
+        throw std::runtime_error("Missing argument for parameter '" +
+                                 parameter.name + "'");
+      }
+
+      environment->define(parameter.name, Variable{std::move(value), false});
+    }
+
+    // Execute function body.
+    for (const auto &statement : declaration->body) {
+      executeStatement(statement.get());
+    }
+  } catch (const ReturnException &returnValue) {
+    environment = previousEnvironment;
+    return returnValue.value;
+  }
+
+  environment = previousEnvironment;
+
+  throw std::runtime_error("Function ended without returning a value");
+}
+
 // *****************************************
 // Evaluate
 // *****************************************
@@ -117,8 +182,8 @@ Value Interpreter::evaluate(const Expression *expression) {
   if (auto *identifier =
           dynamic_cast<const IdentifierExpression *>(expression)) {
 
-    return environment.get(identifier->name, identifier->line,
-                           identifier->column);
+    return environment->get(identifier->name, identifier->line,
+                            identifier->column);
   }
 
   if (auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
@@ -256,6 +321,10 @@ Value Interpreter::evaluate(const Expression *expression) {
     }
   }
 
+  if (auto call = dynamic_cast<const CallExpression *>(expression)) {
+    return evaluateCall(call);
+  }
+
   if (auto *integer = dynamic_cast<const IntegerExpression *>(expression)) {
     return integer->value;
   }
@@ -314,14 +383,14 @@ void Interpreter::executeStatement(const Statement *statement) {
           dynamic_cast<const VariableDeclaration *>(statement)) {
     Value value = evaluate(declaration->value.get());
 
-    environment.define(declaration->name,
-                       Variable{value, declaration->mutable_});
+    environment->define(declaration->name,
+                        Variable{value, declaration->mutable_});
   } else if (auto *assignment =
                  dynamic_cast<const AssignmentStatement *>(statement)) {
     Value value = evaluate(assignment->value.get());
 
-    environment.assign(assignment->name, Variable{value, true},
-                       assignment->value->line, assignment->value->column);
+    environment->assign(assignment->name, Variable{value, true},
+                        assignment->value->line, assignment->value->column);
   } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
     Value conditionValue = evaluate(ifStatement->condition.get());
 
@@ -339,9 +408,21 @@ void Interpreter::executeStatement(const Statement *statement) {
         executeStatement(elseStatement.get());
       }
     }
+  } else if (auto function =
+                 dynamic_cast<const FunctionStatement *>(statement)) {
+    auto runtimeFunction = std::make_shared<Function>();
+    runtimeFunction->declaration = const_cast<FunctionStatement *>(function);
+    environment->define(function->name, Variable{runtimeFunction, false});
+    return;
+  } else if (auto returnStatement =
+                 dynamic_cast<const ReturnStatement *>(statement)) {
+    Value value = evaluate(returnStatement->value.get());
 
-  } else if (auto *whileStatement =
-                 dynamic_cast<const WhileStatement *>(statement)) {
+    throw ReturnException(std::move(value));
+  }
+
+  else if (auto *whileStatement =
+               dynamic_cast<const WhileStatement *>(statement)) {
     while (true) {
       Value conditionValue = evaluate(whileStatement->condition.get());
 

@@ -277,6 +277,12 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::MUT, c, startLine, startColumn};
   }
 
+  else if (c == "fn") {
+    return Token{TokenType::FN, c, startLine, startColumn};
+  } else if (c == "return") {
+    return Token{TokenType::RETURN, c, startLine, startColumn};
+  }
+
   else if (c == "if") {
     return Token{TokenType::IF, c, startLine, startColumn};
   } else if (c == "else") {

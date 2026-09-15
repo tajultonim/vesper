@@ -7,6 +7,10 @@ std::string tokenTypeName(TokenType type) {
     return "LET";
   case TokenType::MUT:
     return "MUT";
+  case TokenType::FN:
+    return "FN";
+  case TokenType::RETURN:
+    return "RETURN";
 
   case TokenType::IF:
     return "IF";

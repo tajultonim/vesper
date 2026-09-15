@@ -11,6 +11,7 @@ public:
   Parser(const std::vector<Token> &tokens);
 
   Token current() const;
+  Token peek() const;
   void advance();
   bool expect(TokenType type);
 
@@ -32,10 +33,15 @@ public:
   std::unique_ptr<Statement> parseWhileStatement();
   std::unique_ptr<Statement> parsePrint();
   std::unique_ptr<Statement> parseStatement();
+  std::unique_ptr<Statement> parseFunction();
+  std::unique_ptr<Statement> parseExpressionStatement();
+  std::unique_ptr<Expression> parseCall(std::unique_ptr<Expression> callee);
+  std::unique_ptr<Statement> parseReturn();
 
 private:
   std::vector<Token> tokens;
   std::size_t position = 0;
+  std::unique_ptr<Statement> handleIdentifier();
 };
 
 std::string tokenTypeName(TokenType type);
