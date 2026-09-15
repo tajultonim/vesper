@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Getting Started
-nav_order: 2
+nav_order: 3
 ---
 
 # Getting Started
@@ -18,19 +18,19 @@ hello.vsp
 
 The command-line interface is:
 
-```text
+```bash
 vesper <file.vsp>
 ```
 
 For example:
 
-```text
+```bash
 vesper hello.vsp
 ```
 
 ## Command-line options
 
-```text
+```bash
 vesper --help
 vesper -h
 
@@ -44,9 +44,18 @@ The current development version is `0.1.0`.
 
 Vesper includes a formatter named `vspfmt`.
 
-```text
+```bash
 vspfmt <file.vsp>
 ```
+
+To overwrite the file with formatted value use:
+
+```bash
+
+vspfmt <file.vsp> -w
+
+```
+
 
 The formatter is intended to produce consistent indentation, spacing, and layout while preserving comments.
 

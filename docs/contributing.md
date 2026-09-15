@@ -43,7 +43,7 @@ vesper/
 
 From the project root:
 
-```powershell
+```bash
 cmake -S . -B build
 cmake --build build
 ```
