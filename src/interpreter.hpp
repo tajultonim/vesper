@@ -21,4 +21,6 @@ public:
 
 private:
   std::shared_ptr<Environment> environment = std::make_shared<Environment>();
+
+  void printValue(const Value &value);
 };

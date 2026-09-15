@@ -22,7 +22,6 @@ struct FunctionInfo
     Type returnType;
 };
 
-
 class TypeChecker
 {
 public:

@@ -285,21 +285,7 @@ void Formatter::formatStatement(const Statement *statement) {
     output += ";\n";
   }
 
-  else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
-    writeIndent();
-
-    output += "print(";
-
-    for (std::size_t i = 0; i < print->values.size(); ++i) {
-      if (i > 0)
-        output += ", ";
-
-      formatExpression(print->values[i].get());
-    }
-
-    output += ");\n";
-  }
-
+ 
   else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
     writeIndent();
 

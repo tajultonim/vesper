@@ -41,8 +41,8 @@ Token Lexer::readNumber() {
     c += current();
     advance();
   }
-  if (current() == '.' && position + 1 < source.size() &&
-      peek() >= '0' && peek() <= '9') {
+  if (current() == '.' && position + 1 < source.size() && peek() >= '0' &&
+      peek() <= '9') {
     c += current();
     advance();
 
@@ -66,8 +66,7 @@ Token Lexer::readComment() {
     value += current();
     advance();
     while (current() != '\0') {
-      if (current() == '#' && position + 1 < source.size() &&
-          peek() == '#') {
+      if (current() == '#' && position + 1 < source.size() && peek() == '#') {
         value += current();
         advance();
         value += current();
@@ -294,7 +293,15 @@ Token Lexer::readIdentifier() {
     advance();
   }
 
-  if (c == "let") {
+  if (c == "import") {
+    return Token{TokenType::IMPORT, c, startLine, startColumn};
+  } else if (c == "export") {
+    return Token{TokenType::EXPORT, c, startLine, startColumn};
+  } else if (c == "extern") {
+    return Token{TokenType::EXTERN, c, startLine, startColumn};
+  }
+
+  else if (c == "let") {
     return Token{TokenType::LET, c, startLine, startColumn};
   } else if (c == "mut") {
     return Token{TokenType::MUT, c, startLine, startColumn};
@@ -320,16 +327,13 @@ Token Lexer::readIdentifier() {
     return Token{TokenType::BREAK, c, startLine, startColumn};
   }
 
-  else if (c == "int" || c == "bool" || c == "float" || c == "string") {
+  else if (c == "int" || c == "bool" || c == "float" || c == "string" ||
+           c == "void") {
     return Token{TokenType::TYPE, c, startLine, startColumn};
   } else if (c == "true") {
     return Token{TokenType::TRUE, c, startLine, startColumn};
   } else if (c == "false") {
     return Token{TokenType::FALSE, c, startLine, startColumn};
-  }
-
-  else if (c == "print") {
-    return Token{TokenType::PRINT, c, startLine, startColumn};
   }
 
   return Token{TokenType::IDENTIFIER, c, startLine, startColumn};

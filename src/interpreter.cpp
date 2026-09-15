@@ -106,6 +106,42 @@ void requireNumericOperands(const Value &left, const Value &right,
 }
 
 Value Interpreter::evaluateCall(const CallExpression *call) {
+  // Handle built-in functions
+  if (const auto *identifier =
+          dynamic_cast<const IdentifierExpression *>(call->callee.get())) {
+    if (identifier->name == "print") {
+      for (const auto &argument : call->arguments) {
+        Value value = evaluate(argument.get());
+        printValue(value);
+      }
+
+      std::cout << '\n';
+      return {};
+    }
+
+    if (identifier->name == "input") {
+      if (call->arguments.size() > 1) {
+        throw std::runtime_error("input() takes at most one argument");
+      }
+
+      if (!call->arguments.empty()) {
+        Value prompt = evaluate(call->arguments[0].get());
+
+        if (!std::holds_alternative<std::string>(prompt)) {
+          throw std::runtime_error("input() prompt must be a string");
+        }
+
+        std::cout << std::get<std::string>(prompt);
+      }
+
+      std::string value;
+      std::getline(std::cin, value);
+
+      return value;
+    }
+  }
+
+  // Call
   Value callee = evaluate(call->callee.get());
 
   if (!std::holds_alternative<std::shared_ptr<Function>>(callee)) {
@@ -157,6 +193,11 @@ Value Interpreter::evaluateCall(const CallExpression *call) {
     }
 
     // Execute function body.
+    if (declaration->body.empty()) {
+      throw std::runtime_error(
+          "RUNTIME_ERROR: Function body is empty for function '" +
+          declaration->name + "'");
+    }
     for (const auto &statement : declaration->body) {
       executeStatement(statement.get());
     }
@@ -166,8 +207,11 @@ Value Interpreter::evaluateCall(const CallExpression *call) {
   }
 
   environment = previousEnvironment;
-
-  throw std::runtime_error("Function ended without returning a value");
+  if (declaration->returnType.kind == Type::Kind::VOID) {
+    return Value{};
+  }
+  throw std::runtime_error(
+      "RUNTIME ERROR: Function ended without returning a value");
 }
 
 // *****************************************
@@ -440,34 +484,9 @@ void Interpreter::executeStatement(const Statement *statement) {
       }
     }
 
-  } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
-    for (const auto &expression : print->values) {
-      Value value = evaluate(expression.get());
-
-      std::visit(
-          [](auto &&value) {
-            using T = std::decay_t<decltype(value)>;
-
-            if constexpr (std::is_same_v<T, bool>)
-              std::cout << (value ? "true" : "false");
-            else if constexpr (std::is_same_v<T, double>) {
-              std::ostringstream stream;
-              stream << value;
-
-              std::string output = stream.str();
-
-              if (output.find('.') == std::string::npos &&
-                  output.find('e') == std::string::npos &&
-                  output.find('E') == std::string::npos) {
-                output += ".0";
-              }
-
-              std::cout << output;
-            } else
-              std::cout << value;
-          },
-          value);
-    }
+  } else if (const auto *expressionStatement =
+                 dynamic_cast<const ExpressionStatement *>(statement)) {
+    evaluate(expressionStatement->expression.get());
   } else {
     throw std::runtime_error("RUNTIME_ERROR: Unknown statement");
   }
@@ -481,4 +500,35 @@ void Interpreter::execute(const Program &program) {
   for (const auto &statement : program.statements) {
     executeStatement(statement.get());
   }
+}
+
+//*****************************************
+// Built-in functions
+//*****************************************
+
+void Interpreter::printValue(const Value &value) {
+  std::visit(
+      [](auto &&value) {
+        using T = std::decay_t<decltype(value)>;
+
+        if constexpr (std::is_same_v<T, bool>) {
+          std::cout << (value ? "true" : "false");
+        } else if constexpr (std::is_same_v<T, double>) {
+          std::ostringstream stream;
+          stream << value;
+
+          std::string output = stream.str();
+
+          if (output.find('.') == std::string::npos &&
+              output.find('e') == std::string::npos &&
+              output.find('E') == std::string::npos) {
+            output += ".0";
+          }
+
+          std::cout << output;
+        } else {
+          std::cout << value;
+        }
+      },
+      value);
 }

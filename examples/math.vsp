@@ -1,0 +1,3 @@
+extern fn sqrt(x: float): float;
+
+print("The square root of 16 is: " + sqrt(16.0));

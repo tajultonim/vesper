@@ -245,6 +245,14 @@ Type TypeChecker::checkCall(const CallExpression *call) {
                              "a function name");
   }
 
+  if (identifier->name == "print") {
+    return Type(Type::Kind::VOID);
+  }
+
+  if (identifier->name == "input") {
+    return Type(Type::Kind::STRING);
+  }
+
   auto functionIt = functions.find(identifier->name);
 
   if (functionIt == functions.end()) {
@@ -351,6 +359,18 @@ void TypeChecker::checkWhileStatement(const WhileStatement *whileStatement) {
 }
 
 void TypeChecker::checkFunction(const FunctionStatement *function) {
+  FunctionInfo info{{}, {}, function->returnType};
+
+  for (const auto &parameter : function->parameters) {
+    info.parameterTypes.push_back(parameter.type);
+    info.hasDefault.push_back(parameter.defaultValue != nullptr);
+  }
+
+  functions.insert_or_assign(function->name, std::move(info));
+  
+  if (function->isExtern)
+    return;
+
   // Save the current scope.
   auto previousTypes = std::move(types);
 
@@ -423,14 +443,6 @@ void TypeChecker::checkStatement(const Statement *statement) {
   if (auto expressionStatement =
           dynamic_cast<const ExpressionStatement *>(statement)) {
     checkExpression(expressionStatement->expression.get());
-    return;
-  }
-
-  if (auto print = dynamic_cast<const PrintStatement *>(statement)) {
-    for (const auto &value : print->values) {
-      checkExpression(value.get());
-    }
-
     return;
   }
 

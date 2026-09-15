@@ -3,6 +3,13 @@
 std::string tokenTypeName(TokenType type) {
   switch (type) {
 
+  case TokenType::IMPORT:
+    return "IMPORT";
+  case TokenType::EXPORT:
+    return "EXPORT";
+  case TokenType::EXTERN:
+    return "EXTERN";
+
   case TokenType::LET:
     return "LET";
   case TokenType::MUT:
@@ -23,9 +30,6 @@ std::string tokenTypeName(TokenType type) {
     return "BREAK";
   case TokenType::FOR:
     return "FOR";
-
-  case TokenType::PRINT:
-    return "PRINT";
 
   case TokenType::TYPE:
     return "TYPE";

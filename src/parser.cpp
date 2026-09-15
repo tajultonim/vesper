@@ -46,6 +46,9 @@ Type Parser::parseType() {
     if (typeName == "string")
       return Type(Type::Kind::STRING);
 
+    if (typeName == "void")
+      return Type(Type::Kind::VOID);
+
     throw std::runtime_error("PARSER ERROR:Unknown type: " + typeName);
   }
 
@@ -299,17 +302,18 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
 
 std::unique_ptr<Statement> Parser::parseStatement() {
   switch (current().type) {
+
   case TokenType::LET:
   case TokenType::MUT:
     return parseDeclaration();
 
   case TokenType::FN:
-    return parseFunction();
+    return parseFunction(false);
+  case TokenType::EXTERN:
+    advance();
+    return parseFunction(true);
   case TokenType::RETURN:
     return parseReturn();
-
-  case TokenType::PRINT:
-    return parsePrint();
 
   case TokenType::IF:
     return parseIfStatement();
@@ -386,14 +390,13 @@ Parser::parseCall(std::unique_ptr<Expression> callee) {
     return call;
   }
 
-  // Arguments
   while (true) {
     call->arguments.push_back(parseExpression());
 
     if (current().type != TokenType::COMMA)
       break;
 
-    advance(); // consume ','
+    advance();
   }
 
   expect(TokenType::RPAREN);
@@ -542,7 +545,7 @@ std::unique_ptr<Expression> Parser::parsePostfix() {
 
   return expression;
 }
-std::unique_ptr<Statement> Parser::parseFunction() {
+std::unique_ptr<Statement> Parser::parseFunction(bool isExtern) {
   int line = current().line;
   int column = current().column;
   advance(); // consume 'fn'
@@ -600,7 +603,12 @@ std::unique_ptr<Statement> Parser::parseFunction() {
 
   function->line = line;
   function->column = column;
+  function->isExtern = isExtern;
 
+  if (isExtern) {
+    expect(TokenType::SEMICOLON);
+    return function;
+  }
   // Function body
   expect(TokenType::LBRACE);
 
@@ -638,21 +646,4 @@ Program Parser::parseProgram() {
   }
 
   return program;
-}
-
-std::unique_ptr<Statement> Parser::parsePrint() {
-  advance(); // print
-  expect(TokenType::LPAREN);
-  auto statement = std::make_unique<PrintStatement>();
-  statement->line = current().line;
-  statement->column = current().column;
-  statement->values.push_back(parseExpression());
-  while (current().type == TokenType::COMMA) {
-    advance();
-    statement->values.push_back(parseExpression());
-  }
-  expect(TokenType::RPAREN);
-  expect(TokenType::SEMICOLON);
-
-  return statement;
 }

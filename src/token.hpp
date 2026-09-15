@@ -6,9 +6,13 @@
 #include <vector>
 
 enum class TokenType {
+
+  IMPORT,
+  EXPORT,
+  EXTERN,
+
   LET,
   MUT,
-  PRINT,
   IDENTIFIER,
   FN,
   RETURN,

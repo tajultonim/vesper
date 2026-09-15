@@ -76,10 +76,6 @@ struct AssignmentStatement : Statement {
   std::unique_ptr<Expression> value;
 };
 
-struct PrintStatement : Statement {
-  std::vector<std::unique_ptr<Expression>> values;
-};
-
 struct IfStatement : Statement {
   std::unique_ptr<Expression> condition;
   std::vector<std::unique_ptr<Statement>> thenBranch;
@@ -108,10 +104,12 @@ struct FunctionStatement : Statement {
   Type returnType;
   std::vector<std::unique_ptr<Statement>> body;
 
+  bool isExtern = false;
+
   FunctionStatement(std::string name, std::vector<Parameter> parameters,
-                    Type returnType)
+                    Type returnType, bool isExtern = false)
       : name(std::move(name)), parameters(std::move(parameters)),
-        returnType(std::move(returnType)) {}
+        returnType(std::move(returnType)), isExtern(isExtern) {}
 };
 
 struct ReturnStatement : Statement {
@@ -126,5 +124,3 @@ struct CallExpression : Expression {
 struct Program {
   std::vector<std::unique_ptr<Statement>> statements;
 };
-
-void printExpression(const Expression *expression, int indent = 0);

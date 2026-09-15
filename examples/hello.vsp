@@ -1,0 +1,9 @@
+
+
+let name: string = input("What is your name? ");
+
+fn greet(name: string): void {
+    print("Hello, " + name + "!");
+}
+
+greet(name);
