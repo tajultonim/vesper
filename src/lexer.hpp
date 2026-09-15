@@ -11,6 +11,7 @@ public:
   Lexer(const std::string &source);
 
   char current() const;
+  char peek() const;
   void advance();
   std::vector<Token> tokenize();
 
@@ -21,6 +22,7 @@ private:
   int column = 1;
   Token readNumber();
   Token readString();
+  Token readComment();
   Token readIdentifier();
   void skipWhitespace();
 };

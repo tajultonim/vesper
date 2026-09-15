@@ -8,8 +8,12 @@ Token Parser::current() const { return tokens[position]; }
 Token Parser::peek() const { return tokens[position + 1]; }
 
 void Parser::advance() {
+
   if (position < tokens.size()) {
     position++;
+    // if (current().type == TokenType::COMMENT) {
+    //   advance();
+    // }
   }
 }
 
@@ -68,7 +72,8 @@ Type Parser::parseType() {
 
 std::unique_ptr<Statement> Parser::parseDeclaration() {
   auto statement = std::make_unique<VariableDeclaration>();
-
+  statement->line = current().line;
+  statement->column = current().column;
   if (current().type == TokenType::MUT) {
     statement->mutable_ = true;
     advance();
@@ -101,7 +106,8 @@ std::unique_ptr<Statement> Parser::parseDeclaration() {
 
 std::unique_ptr<Statement> Parser::parseAssignment() {
   auto statement = std::make_unique<AssignmentStatement>();
-
+  statement->line = current().line;
+  statement->column = current().column;
   statement->name = current().value;
   expect(TokenType::IDENTIFIER);
 
@@ -308,6 +314,10 @@ std::unique_ptr<Statement> Parser::parseStatement() {
   case TokenType::IF:
     return parseIfStatement();
 
+  case TokenType::COMMENT:
+    advance();
+    return parseStatement();
+
   case TokenType::IDENTIFIER:
     return handleIdentifier();
 
@@ -345,6 +355,9 @@ std::unique_ptr<Statement> Parser::handleIdentifier() {
   // Function call
   if (current().type == TokenType::LPAREN) {
     auto statement = std::make_unique<ExpressionStatement>();
+    statement->line = current().line;
+
+    statement->column = current().column;
 
     statement->expression = parseCall(std::move(callee));
 
@@ -390,6 +403,9 @@ Parser::parseCall(std::unique_ptr<Expression> callee) {
 
 std::unique_ptr<Statement> Parser::parseExpressionStatement() {
   auto statement = std::make_unique<ExpressionStatement>();
+  statement->line = current().line;
+  statement->column = current().column;
+
   statement->expression = parseExpression();
   expect(TokenType::SEMICOLON);
   return statement;
@@ -397,6 +413,8 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
 
 std::unique_ptr<Statement> Parser::parseIfStatement() {
   auto statement = std::make_unique<IfStatement>();
+  statement->line = current().line;
+  statement->column = current().column;
 
   expect(TokenType::IF);
   expect(TokenType::LPAREN);
@@ -433,7 +451,8 @@ std::unique_ptr<Statement> Parser::parseIfStatement() {
 
 std::unique_ptr<Statement> Parser::parseWhileStatement() {
   auto statement = std::make_unique<WhileStatement>();
-
+  statement->line = current().line;
+  statement->column = current().column;
   expect(TokenType::WHILE);
   expect(TokenType::LPAREN);
 
@@ -524,6 +543,8 @@ std::unique_ptr<Expression> Parser::parsePostfix() {
   return expression;
 }
 std::unique_ptr<Statement> Parser::parseFunction() {
+  int line = current().line;
+  int column = current().column;
   advance(); // consume 'fn'
 
   // Function name
@@ -577,6 +598,9 @@ std::unique_ptr<Statement> Parser::parseFunction() {
   auto function = std::make_unique<FunctionStatement>(
       std::move(name), std::move(parameters), std::move(returnType));
 
+  function->line = line;
+  function->column = column;
+
   // Function body
   expect(TokenType::LBRACE);
 
@@ -593,17 +617,17 @@ std::unique_ptr<Statement> Parser::parseFunction() {
   return function;
 }
 
-std::unique_ptr<Statement> Parser::parseReturn()
-{
-    expect(TokenType::RETURN);
+std::unique_ptr<Statement> Parser::parseReturn() {
+  expect(TokenType::RETURN);
 
-    auto statement = std::make_unique<ReturnStatement>();
+  auto statement = std::make_unique<ReturnStatement>();
+  statement->line = current().line;
+  statement->column = current().column;
+  statement->value = parseExpression();
 
-    statement->value = parseExpression();
+  expect(TokenType::SEMICOLON);
 
-    expect(TokenType::SEMICOLON);
-
-    return statement;
+  return statement;
 }
 
 Program Parser::parseProgram() {
@@ -620,6 +644,8 @@ std::unique_ptr<Statement> Parser::parsePrint() {
   advance(); // print
   expect(TokenType::LPAREN);
   auto statement = std::make_unique<PrintStatement>();
+  statement->line = current().line;
+  statement->column = current().column;
   statement->values.push_back(parseExpression());
   while (current().type == TokenType::COMMA) {
     advance();

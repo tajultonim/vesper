@@ -12,6 +12,7 @@ enum class TokenType {
   IDENTIFIER,
   FN,
   RETURN,
+  COMMENT,
 
   TYPE,
 

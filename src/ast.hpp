@@ -55,6 +55,8 @@ struct IdentifierExpression : Expression {
 };
 
 struct Statement {
+  int line = 0;
+  int column = 0;
   virtual ~Statement() = default;
 };
 

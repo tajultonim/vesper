@@ -11,6 +11,14 @@ char Lexer::current() const {
   return source[position];
 }
 
+char Lexer::peek() const {
+  if (position + 1 >= source.size()) {
+    return '\0';
+  }
+
+  return source[position + 1];
+}
+
 void Lexer::advance() {
   if (position < source.size()) {
     if (current() == '\n') {
@@ -34,7 +42,7 @@ Token Lexer::readNumber() {
     advance();
   }
   if (current() == '.' && position + 1 < source.size() &&
-      source[position + 1] >= '0' && source[position + 1] <= '9') {
+      peek() >= '0' && peek() <= '9') {
     c += current();
     advance();
 
@@ -45,6 +53,40 @@ Token Lexer::readNumber() {
     return Token{TokenType::FLOAT_LITERAL, c, startLine, startColumn};
   }
   return Token{TokenType::INTEGER_LITERAL, c, startLine, startColumn};
+}
+
+Token Lexer::readComment() {
+  int commentLine = line;
+  int commentColumn = column;
+
+  std::string value; // Multi-line block comment: ## ... ##
+  if (peek() == '#') {
+    value += current();
+    advance();
+    value += current();
+    advance();
+    while (current() != '\0') {
+      if (current() == '#' && position + 1 < source.size() &&
+          peek() == '#') {
+        value += current();
+        advance();
+        value += current();
+        advance();
+        return Token{TokenType::COMMENT, value, commentLine, commentColumn};
+      }
+      value += current();
+      advance();
+    }
+    throw std::runtime_error(
+        "LEXER ERROR: Unterminated block comment at line " +
+        std::to_string(commentLine) + ", column " +
+        std::to_string(commentColumn));
+  } // Single-line comment: # ...
+  while (current() != '\0' && current() != '\n') {
+    value += current();
+    advance();
+  }
+  return Token{TokenType::COMMENT, value, commentLine, commentColumn};
 }
 
 Token Lexer::readString() {
@@ -124,7 +166,7 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     else if (c == '<') {
-      if (position + 1 < source.size() && source[position + 1] == '=') {
+      if (peek() == '=') {
         tokens.push_back(Token{TokenType::LESS_EQUAL, "<=", line, column});
         advance();
         advance();
@@ -133,7 +175,7 @@ std::vector<Token> Lexer::tokenize() {
         advance();
       }
     } else if (c == '>') {
-      if (position + 1 < source.size() && source[position + 1] == '=') {
+      if (peek() == '=') {
         tokens.push_back(Token{TokenType::GREATER_EQUAL, ">=", line, column});
         advance();
         advance();
@@ -144,7 +186,7 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     else if (c == '!') {
-      if (position + 1 < source.size() && source[position + 1] == '=') {
+      if (peek() == '=') {
         tokens.push_back(Token{TokenType::NOT_EQUAL, "!=", line, column});
         advance();
         advance();
@@ -154,7 +196,7 @@ std::vector<Token> Lexer::tokenize() {
         advance();
       }
     } else if (c == '=') {
-      if (position + 1 < source.size() && source[position + 1] == '=') {
+      if (peek() == '=') {
         tokens.push_back(Token{TokenType::EQUAL_EQUAL, "==", line, column});
         advance();
         advance();
@@ -182,7 +224,7 @@ std::vector<Token> Lexer::tokenize() {
       tokens.push_back(Token{TokenType::MINUS, "-", line, column});
       advance();
     } else if (c == '*') {
-      if (position + 1 < source.size() && source[position + 1] == '*') {
+      if (peek() == '*') {
         tokens.push_back(Token{TokenType::STAR_STAR, "**", line, column});
         advance();
         advance();
@@ -191,7 +233,7 @@ std::vector<Token> Lexer::tokenize() {
         advance();
       }
     } else if (c == '/') {
-      if (position + 1 < source.size() && source[position + 1] == '/') {
+      if (peek() == '/') {
         tokens.push_back(Token{TokenType::SLASH_SLASH, "//", line, column});
         advance();
         advance();
@@ -225,26 +267,7 @@ std::vector<Token> Lexer::tokenize() {
     }
 
     else if (current() == '#') {
-      if (position + 1 < source.size() && source[position + 1] == '#') {
-        advance();
-        advance();
-        while (current() != '\0') {
-          if (current() == '#' && position + 1 < source.size() &&
-              source[position + 1] == '#') {
-            advance();
-            advance();
-            break;
-          }
-          advance();
-        }
-
-        continue;
-      }
-
-      while (current() != '\0' && current() != '\n') {
-        advance();
-      }
-      continue;
+      tokens.push_back(readComment());
     }
 
     else {

@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     Program program = parser.parseProgram();
 
     Formatter formatter;
-    std::string formatted = formatter.format(program);
+    std::string formatted = formatter.format(program, tokens);
 
     if (write) {
       std::ofstream output(filename);

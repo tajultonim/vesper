@@ -41,7 +41,7 @@ std::string operatorToString(TokenType type) {
 
   case TokenType::LESS_EQUAL:
     return "<=";
-    
+
   case TokenType::GREATER_EQUAL:
     return ">=";
 
@@ -127,6 +127,44 @@ int Formatter::precedence(TokenType type) {
   }
 }
 
+/*
+ * Format all statements inside a block.
+ *
+ * blockStartLine is important because comments before the
+ * block belong to the statement that opened the block.
+ *
+ * Example:
+ *
+ * # function comment
+ * fn test(): int {
+ *     # body comment
+ *     return 1;
+ * }
+ *
+ * "# function comment" belongs to fn.
+ * "# body comment" belongs to the function body.
+ */
+void Formatter::formatBlock(
+    const std::vector<std::unique_ptr<Statement>> &statements,
+    int blockStartLine) {
+  for (const auto &stmt : statements) {
+    /*
+     * Only consume comments that occur AFTER the line
+     * where this block started.
+     *
+     * Comments before the block were handled by the
+     * parent formatter.
+     */
+    if (stmt->line > blockStartLine) {
+      formatCommentsBefore(stmt->line);
+    }
+
+    formatStatement(stmt.get());
+
+    formatTrailingComment(stmt->line);
+  }
+}
+
 void Formatter::formatExpression(const Expression *expression,
                                  int parentPrecedence) {
   if (auto *integer = dynamic_cast<const IntegerExpression *>(expression)) {
@@ -167,8 +205,11 @@ void Formatter::formatExpression(const Expression *expression,
     output += "]";
   } else if (auto *index = dynamic_cast<const IndexExpression *>(expression)) {
     formatExpression(index->object.get());
+
     output += "[";
+
     formatExpression(index->index.get());
+
     output += "]";
   } else if (auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
     output += operatorToString(unary->operatorType);
@@ -193,6 +234,19 @@ void Formatter::formatExpression(const Expression *expression,
 
     if (needsParentheses)
       output += ")";
+  } else if (auto *call = dynamic_cast<const CallExpression *>(expression)) {
+    formatExpression(call->callee.get());
+
+    output += "(";
+
+    for (std::size_t i = 0; i < call->arguments.size(); ++i) {
+      if (i > 0)
+        output += ", ";
+
+      formatExpression(call->arguments[i].get());
+    }
+
+    output += ")";
   } else {
     throw std::runtime_error("Unknown expression");
   }
@@ -204,6 +258,7 @@ void Formatter::formatStatement(const Statement *statement) {
     writeIndent();
 
     output += declaration->mutable_ ? "mut " : "let ";
+
     output += declaration->name;
 
     if (declaration->declaredType) {
@@ -216,8 +271,10 @@ void Formatter::formatStatement(const Statement *statement) {
     formatExpression(declaration->value.get());
 
     output += ";\n";
-  } else if (auto *assignment =
-                 dynamic_cast<const AssignmentStatement *>(statement)) {
+  }
+
+  else if (auto *assignment =
+               dynamic_cast<const AssignmentStatement *>(statement)) {
     writeIndent();
 
     output += assignment->name;
@@ -226,7 +283,9 @@ void Formatter::formatStatement(const Statement *statement) {
     formatExpression(assignment->value.get());
 
     output += ";\n";
-  } else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
+  }
+
+  else if (auto *print = dynamic_cast<const PrintStatement *>(statement)) {
     writeIndent();
 
     output += "print(";
@@ -239,22 +298,25 @@ void Formatter::formatStatement(const Statement *statement) {
     }
 
     output += ");\n";
-  } else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
+  }
+
+  else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
     writeIndent();
 
     output += "if (";
+
     formatExpression(ifStatement->condition.get());
+
     output += ") {\n";
 
     indentLevel++;
 
-    for (const auto &stmt : ifStatement->thenBranch) {
-      formatStatement(stmt.get());
-    }
+    formatBlock(ifStatement->thenBranch, ifStatement->line);
 
     indentLevel--;
 
     writeIndent();
+
     output += "}";
 
     if (!ifStatement->elseBranch.empty()) {
@@ -262,44 +324,215 @@ void Formatter::formatStatement(const Statement *statement) {
 
       indentLevel++;
 
-      for (const auto &stmt : ifStatement->elseBranch) {
-        formatStatement(stmt.get());
-      }
+      formatBlock(ifStatement->elseBranch, ifStatement->line);
 
       indentLevel--;
 
       writeIndent();
+
       output += "}";
     }
 
     output += "\n";
-  } else if (auto *whileStatement =
-                 dynamic_cast<const WhileStatement *>(statement)) {
+  }
+
+  else if (auto *function =
+               dynamic_cast<const FunctionStatement *>(statement)) {
     writeIndent();
 
-    output += "while (";
-    formatExpression(whileStatement->condition.get());
-    output += ") {\n";
+    output += "fn ";
+    output += function->name;
+    output += "(";
+
+    for (std::size_t i = 0; i < function->parameters.size(); ++i) {
+      if (i > 0)
+        output += ", ";
+
+      const auto &param = function->parameters[i];
+
+      output += param.name;
+      output += ": ";
+      output += typeToString(param.type);
+
+      if (param.defaultValue) {
+        output += " = ";
+
+        formatExpression(param.defaultValue.get());
+      }
+    }
+
+    output += "): ";
+    output += typeToString(function->returnType);
+    output += " {\n";
 
     indentLevel++;
 
-    for (const auto &stmt : whileStatement->body) {
-      formatStatement(stmt.get());
-    }
+    formatBlock(function->body, function->line);
 
     indentLevel--;
 
     writeIndent();
+
+    output += "}\n";
+  }
+
+  else if (auto *returnStatement =
+               dynamic_cast<const ReturnStatement *>(statement)) {
+    writeIndent();
+
+    output += "return ";
+
+    formatExpression(returnStatement->value.get());
+
+    output += ";\n";
+  }
+
+  else if (auto *whileStatement =
+               dynamic_cast<const WhileStatement *>(statement)) {
+    writeIndent();
+
+    output += "while (";
+
+    formatExpression(whileStatement->condition.get());
+
+    output += ") {\n";
+
+    indentLevel++;
+
+    formatBlock(whileStatement->body, whileStatement->line);
+
+    indentLevel--;
+
+    writeIndent();
+
     output += "}\n";
   }
 }
 
-std::string Formatter::format(const Program &program) {
+/*
+ * Format comments that appear before a statement.
+ */
+void Formatter::formatCommentsBefore(int line) {
+  while (commentPosition < comments.size()) {
+    const Token &comment = comments[commentPosition];
+
+    /*
+     * A comment on the same line belongs to the
+     * statement on that line and is handled by
+     * formatTrailingComment().
+     */
+    if (comment.line >= line)
+      break;
+
+    writeIndent();
+
+    output += comment.value;
+    output += "\n";
+
+    ++commentPosition;
+  }
+}
+
+/*
+ * Format comments appearing after a statement on
+ * the same source line.
+ */
+void Formatter::formatTrailingComment(int line) {
+  while (commentPosition < comments.size()) {
+    const Token &comment = comments[commentPosition];
+
+    if (comment.line != line)
+      break;
+
+    /*
+     * formatStatement() already produced '\n'.
+     */
+    if (!output.empty() && output.back() == '\n') {
+      output.pop_back();
+    }
+
+    output += " ";
+    output += comment.value;
+    output += "\n";
+
+    ++commentPosition;
+  }
+}
+
+std::string Formatter::format(const Program &program,
+                              const std::vector<Token> &tokens) {
   output.clear();
   indentLevel = 0;
 
+  comments.clear();
+  commentPosition = 0;
+
+  /*
+   * Keep comments from the original token stream.
+   *
+   * The parser may ignore COMMENT tokens, but the
+   * formatter still has access to them here.
+   */
+  for (const auto &token : tokens) {
+    if (token.type == TokenType::COMMENT) {
+      comments.push_back(token);
+    }
+  }
+
+  enum class StatementKind { Other, VarDecl, FuncDecl, Call };
+
+  StatementKind prevKind = StatementKind::Other;
+
+  /*
+   * Top-level statements.
+   */
   for (const auto &statement : program.statements) {
-    formatStatement(statement.get());
+    const Statement *stmtPtr = statement.get();
+
+    /*
+     * IMPORTANT:
+     *
+     * This consumes comments BEFORE the top-level
+     * statement, including comments before a function.
+     */
+    formatCommentsBefore(stmtPtr->line);
+
+    StatementKind currentKind = StatementKind::Other;
+
+    if (dynamic_cast<const VariableDeclaration *>(stmtPtr)) {
+      currentKind = StatementKind::VarDecl;
+    } else if (dynamic_cast<const FunctionStatement *>(stmtPtr)) {
+      currentKind = StatementKind::FuncDecl;
+    } else if (auto *assign =
+                   dynamic_cast<const AssignmentStatement *>(stmtPtr)) {
+      if (dynamic_cast<const CallExpression *>(assign->value.get())) {
+        currentKind = StatementKind::Call;
+      }
+    }
+
+    if (prevKind != StatementKind::Other && prevKind != currentKind) {
+      output += "\n";
+    }
+
+    formatStatement(stmtPtr);
+
+    formatTrailingComment(stmtPtr->line);
+
+    prevKind = currentKind;
+  }
+
+  /*
+   * Any comments remaining after the final statement.
+   */
+  while (commentPosition < comments.size()) {
+    const Token &comment = comments[commentPosition];
+
+    writeIndent();
+
+    output += comment.value;
+    output += "\n";
+
+    ++commentPosition;
   }
 
   return output;
