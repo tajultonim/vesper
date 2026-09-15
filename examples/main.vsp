@@ -1,0 +1,4 @@
+import "physics" as p;
+import "math" as m;
+
+m.square(5.0);

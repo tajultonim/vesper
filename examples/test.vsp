@@ -1,5 +1,0 @@
-
-
-let a:bool=2==1;
-
-print(a);

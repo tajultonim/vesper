@@ -1,0 +1,5 @@
+import "math" as m;
+
+fn energy(mass: float, c: float): float {
+    return mass * m.square(c);
+}

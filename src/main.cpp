@@ -67,10 +67,6 @@ int main(int argc, char *argv[]) {
       if (const auto *import =
               dynamic_cast<const ImportStatement *>(statement.get())) {
         Module module = loader.load(import->path);
-
-        // For now, just verify it loaded.
-        std::cout << "Loaded module: " << import->path << " as "
-                  << import->alias << '\n';
       }
     }
 

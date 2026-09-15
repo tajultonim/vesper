@@ -1,3 +1,4 @@
-extern fn sqrt(x: float): float;
 
-print("The square root of 16 is: " + sqrt(16.0));
+fn square(x: float): float {
+    return x * x;
+}
