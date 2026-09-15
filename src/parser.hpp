@@ -27,12 +27,13 @@ public:
   Type parseType();
   Program parseProgram();
 
+  std::unique_ptr<Statement> parseImport();
   std::unique_ptr<Statement> parseDeclaration();
   std::unique_ptr<Statement> parseAssignment();
   std::unique_ptr<Statement> parseIfStatement();
   std::unique_ptr<Statement> parseWhileStatement();
   std::unique_ptr<Statement> parseStatement();
-  std::unique_ptr<Statement> parseFunction(bool isExtern);
+  std::unique_ptr<Statement> parseFunction();
   std::unique_ptr<Statement> parseExpressionStatement();
   std::unique_ptr<Expression> parseCall(std::unique_ptr<Expression> callee);
   std::unique_ptr<Statement> parseReturn();

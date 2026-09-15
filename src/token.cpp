@@ -5,6 +5,8 @@ std::string tokenTypeName(TokenType type) {
 
   case TokenType::IMPORT:
     return "IMPORT";
+  case TokenType::AS:
+    return "AS";
   case TokenType::EXPORT:
     return "EXPORT";
   case TokenType::EXTERN:
@@ -83,6 +85,8 @@ std::string tokenTypeName(TokenType type) {
     return "SEMICOLON";
   case TokenType::COLON:
     return "COLON";
+  case TokenType::DOT:
+    return "DOT";
 
   case TokenType::INVALID:
     return "INVALID";

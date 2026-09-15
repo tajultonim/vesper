@@ -8,6 +8,7 @@
 enum class TokenType {
 
   IMPORT,
+  AS,
   EXPORT,
   EXTERN,
 
@@ -58,6 +59,7 @@ enum class TokenType {
   COMMA,
   SEMICOLON,
   COLON,
+  DOT,
   INVALID,
   END_OF_FILE
 };

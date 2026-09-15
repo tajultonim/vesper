@@ -214,6 +214,9 @@ std::vector<Token> Lexer::tokenize() {
     } else if (c == ':') {
       tokens.push_back(Token{TokenType::COLON, ":", line, column});
       advance();
+    }else if (c == '.') {
+      tokens.push_back(Token{TokenType::DOT, ".", line, column});
+      advance();
     }
 
     else if (c == '+') {
@@ -295,6 +298,8 @@ Token Lexer::readIdentifier() {
 
   if (c == "import") {
     return Token{TokenType::IMPORT, c, startLine, startColumn};
+  } else if (c == "as") {
+    return Token{TokenType::AS, c, startLine, startColumn};
   } else if (c == "export") {
     return Token{TokenType::EXPORT, c, startLine, startColumn};
   } else if (c == "extern") {

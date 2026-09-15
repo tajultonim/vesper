@@ -54,6 +54,19 @@ struct IdentifierExpression : Expression {
   std::string name;
 };
 
+struct CallExpression : Expression {
+  std::unique_ptr<Expression> callee;
+  std::vector<std::unique_ptr<Expression>> arguments;
+};
+
+struct MemberExpression : Expression {
+  std::unique_ptr<Expression> object;
+  std::string member;
+
+  MemberExpression(std::unique_ptr<Expression> object, std::string member)
+      : object(std::move(object)), member(std::move(member)) {}
+};
+
 struct Statement {
   int line = 0;
   int column = 0;
@@ -105,6 +118,7 @@ struct FunctionStatement : Statement {
   std::vector<std::unique_ptr<Statement>> body;
 
   bool isExtern = false;
+  bool isExport = false;
 
   FunctionStatement(std::string name, std::vector<Parameter> parameters,
                     Type returnType, bool isExtern = false)
@@ -116,9 +130,12 @@ struct ReturnStatement : Statement {
   std::unique_ptr<Expression> value;
 };
 
-struct CallExpression : Expression {
-  std::unique_ptr<Expression> callee;
-  std::vector<std::unique_ptr<Expression>> arguments;
+struct ImportStatement : Statement {
+  std::string path;
+  std::string alias;
+
+  ImportStatement(std::string path, std::string alias)
+      : path(std::move(path)), alias(std::move(alias)) {}
 };
 
 struct Program {

@@ -303,15 +303,18 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
 std::unique_ptr<Statement> Parser::parseStatement() {
   switch (current().type) {
 
+  case TokenType::IMPORT:
+    return parseImport();
+
   case TokenType::LET:
   case TokenType::MUT:
     return parseDeclaration();
 
   case TokenType::FN:
-    return parseFunction(false);
+  case TokenType::EXPORT:
   case TokenType::EXTERN:
-    advance();
-    return parseFunction(true);
+    return parseFunction();
+
   case TokenType::RETURN:
     return parseReturn();
 
@@ -341,6 +344,18 @@ std::unique_ptr<Statement> Parser::parseStatement() {
                              std::to_string(current().line) + ", column " +
                              std::to_string(current().column));
   }
+}
+
+std::unique_ptr<Statement> Parser::parseImport() {
+  expect(TokenType::IMPORT);
+  std::string moduleName = current().value;
+  expect(TokenType::STRING_LITERAL);
+  expect(TokenType::AS);
+  std::string alias = current().value;
+  expect(TokenType::IDENTIFIER);
+  expect(TokenType::SEMICOLON);
+  return std::make_unique<ImportStatement>(std::move(moduleName),
+                                           std::move(alias));
 }
 
 std::unique_ptr<Statement> Parser::handleIdentifier() {
@@ -540,14 +555,34 @@ std::unique_ptr<Expression> Parser::parsePostfix() {
       continue;
     }
 
+    // Member access: foo.bar
+    if (current().type == TokenType::DOT) {
+      advance(); // consume '.'
+      auto member = std::make_unique<MemberExpression>(std::move(expression),                                             current().value);
+      expect(TokenType::IDENTIFIER);
+      expression = std::move(member);
+    }
+
     break;
   }
 
   return expression;
 }
-std::unique_ptr<Statement> Parser::parseFunction(bool isExtern) {
+std::unique_ptr<Statement> Parser::parseFunction() {
   int line = current().line;
   int column = current().column;
+  bool isExtern = false;
+  bool isExport = false;
+  if (current().type == TokenType::EXPORT) {
+    isExport = true;
+    advance(); // consume 'export'
+  }
+
+  if (current().type == TokenType::EXTERN) {
+    isExtern = true;
+    advance(); // consume 'extern'
+  }
+
   advance(); // consume 'fn'
 
   // Function name
@@ -604,6 +639,7 @@ std::unique_ptr<Statement> Parser::parseFunction(bool isExtern) {
   function->line = line;
   function->column = column;
   function->isExtern = isExtern;
+  function->isExport = isExport;
 
   if (isExtern) {
     expect(TokenType::SEMICOLON);
