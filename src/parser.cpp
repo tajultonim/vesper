@@ -1,8 +1,10 @@
 #include "parser.hpp"
+#include "errors.hpp"
 #include "token.hpp"
 #include <iostream>
 
-Parser::Parser(const std::vector<Token> &input) : tokens(input) {}
+Parser::Parser(const std::vector<Token> &input, bool strict)
+  : tokens(input), strict(strict) {}
 
 Token Parser::current() const { return tokens[position]; }
 Token Parser::peek() const { return tokens[position + 1]; }
@@ -19,11 +21,17 @@ void Parser::advance() {
 
 bool Parser::expect(TokenType type) {
   if (current().type != type) {
-    std::cerr << "PARSER ERROR: Parser error at line " << current().line
-              << ", column " << current().column << ": expected "
-              << tokenTypeName(type) << ", got "
-              << tokenTypeName(current().type) << '\n';
+    const std::string message =
+        "expected " + tokenTypeName(type) + ", got " +
+        tokenTypeName(current().type) + " at line " +
+        std::to_string(current().line) + ", column " +
+        std::to_string(current().column);
 
+    if (strict) {
+      throw ParserError(message);
+    }
+
+    std::cerr << "\x1b[31m[PARSER]\x1b[0m " << message << '\n';
     return false;
   }
   advance();
@@ -84,10 +92,16 @@ std::unique_ptr<Statement> Parser::parseDeclaration() {
     statement->mutable_ = false;
     advance();
   } else {
-    std::cerr << "PARSER ERROR: Parser error at line " << current().line
-              << ", column " << current().column
-              << ": expected 'let' or 'mut', got "
-              << tokenTypeName(current().type) << '\n';
+    const std::string message =
+        "expected LET or MUT, got " + tokenTypeName(current().type) +
+        " at line " + std::to_string(current().line) + ", column " +
+        std::to_string(current().column);
+
+    if (strict) {
+      throw ParserError(message);
+    }
+
+    std::cerr << "\x1b[31m[PARSER]\x1b[0m " << message << '\n';
     return nullptr;
   }
 
@@ -339,10 +353,10 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     return parseExpressionStatement();
 
   default:
-    std::cout << tokenTypeName(current().type) << std::endl;
-    throw std::runtime_error("PARSER ERROR: Unexpected statement at line " +
-                             std::to_string(current().line) + ", column " +
-                             std::to_string(current().column));
+    throw ParserError("unexpected statement " +
+                      tokenTypeName(current().type) + " at line " +
+                      std::to_string(current().line) + ", column " +
+                      std::to_string(current().column));
   }
 }
 

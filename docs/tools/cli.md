@@ -79,3 +79,6 @@ import "./math" as math;
 ```
 
 The loader caches each resolved module and detects circular dependencies.
+
+Interpreter errors are color-coded by phase and include the source file and
+line/column when available.

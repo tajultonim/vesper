@@ -38,6 +38,19 @@ inline SourceLocation inferSourceLocation(const std::string &message,
   return location;
 }
 
+inline std::string normalizeErrorMessage(std::string message) {
+  static const std::regex phasePrefix(
+      R"(^\s*(?:LEXER ERROR|PARSER ERROR|MODULE_ERROR|TYPE_ERROR|RUNTIME_ERROR|RUNTIME ERROR)\s*:\s*)");
+  static const std::regex lineSuffix(
+      R"(\s+at\s+line\s+\d+\s*,\s*column\s+\d+\s*$)");
+  static const std::regex coordinateSuffix(R"(\s+at\s+\d+\s*:\s*\d+\s*$)");
+
+  message = std::regex_replace(message, phasePrefix, "");
+  message = std::regex_replace(message, lineSuffix, "");
+  message = std::regex_replace(message, coordinateSuffix, "");
+  return message;
+}
+
 inline const char *errorPhaseName(ErrorPhase phase) {
   switch (phase) {
   case ErrorPhase::CLI:
@@ -59,17 +72,55 @@ inline const char *errorPhaseName(ErrorPhase phase) {
   return "UNKNOWN";
 }
 
+inline const char *errorPhaseColor(ErrorPhase phase) {
+  switch (phase) {
+  case ErrorPhase::CLI:
+    return "\x1b[33m";
+  case ErrorPhase::LEXER:
+    return "\x1b[35m";
+  case ErrorPhase::PARSER:
+    return "\x1b[31m";
+  case ErrorPhase::MODULE:
+    return "\x1b[34m";
+  case ErrorPhase::RESOLVER:
+    return "\x1b[36m";
+  case ErrorPhase::TYPE:
+    return "\x1b[33m";
+  case ErrorPhase::RUNTIME:
+    return "\x1b[91m";
+  }
+
+  return "\x1b[31m";
+}
+
 class VesperError : public std::runtime_error {
 public:
   VesperError(ErrorPhase phase, std::string message)
-      : VesperError(phase, std::move(message), {}) {}
+      : VesperError(phase, normalizeErrorMessage(message),
+                    inferSourceLocation(message, "")) {}
 
   VesperError(ErrorPhase phase, std::string message, SourceLocation location)
-      : std::runtime_error(formatMessage(phase, message, location)),
-        phase_(phase), location_(std::move(location)) {}
+      : std::runtime_error(
+            formatMessage(phase, normalizeErrorMessage(message), location)),
+        phase_(phase), location_(std::move(location)),
+        message_(normalizeErrorMessage(std::move(message))) {}
 
   ErrorPhase phase() const noexcept { return phase_; }
   const SourceLocation &location() const noexcept { return location_; }
+
+  std::string formatWithFile(const std::string &file) const {
+    if (!location_.file.empty() || file.empty()) {
+      return what();
+    }
+
+    return formatMessage(phase_, message_,
+                         SourceLocation{file, location_.line, location_.column});
+  }
+
+  std::string formatColored(const std::string &file) const {
+    return std::string(errorPhaseColor(phase_)) + formatWithFile(file) +
+           "\x1b[0m";
+  }
 
 private:
   static std::string formatMessage(ErrorPhase phase,
@@ -94,6 +145,7 @@ private:
 
   ErrorPhase phase_;
   SourceLocation location_;
+  std::string message_;
 };
 
 class CliError : public VesperError {

@@ -15,6 +15,8 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 
 int main(int argc, char *argv[]) {
 
+  std::string sourceFile;
+
   try {
     if (argc < 2) {
       throw CliError(
@@ -78,6 +80,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::filesystem::path sourcePath = argument;
+    sourceFile = sourcePath.string();
 
     std::ifstream file(sourcePath);
 
@@ -192,7 +195,8 @@ int main(int argc, char *argv[]) {
 
     return 0;
   } catch (const VesperError &error) {
-    std::cerr << "ERROR: " << error.what() << '\n';
+    std::cerr << errorPhaseColor(error.phase()) << "ERROR: "
+              << error.formatWithFile(sourceFile) << "\x1b[0m\n";
     return 1;
   } catch (const std::exception &e) {
     std::cerr << "ERROR: " << e.what() << '\n';

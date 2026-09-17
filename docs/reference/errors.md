@@ -75,3 +75,8 @@ As the compiler matures, error messages should consistently follow:
 ```
 
 For pipeline diagnostics, run the interpreter with `--verbose` or `-V`.
+
+The interpreter uses strict parsing: a parser error stops execution before
+resolution, type checking, or interpretation. The formatter uses recovery
+parsing for recoverable delimiter errors so it can normalize source such as a
+missing semicolon. Errors are color-coded by phase when printed in a terminal.

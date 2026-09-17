@@ -8,7 +8,7 @@
 class Parser {
 
 public:
-  Parser(const std::vector<Token> &tokens);
+  Parser(const std::vector<Token> &tokens, bool strict = true);
 
   Token current() const;
   Token peek() const;
@@ -41,6 +41,7 @@ public:
 private:
   std::vector<Token> tokens;
   std::size_t position = 0;
+  bool strict = true;
   std::unique_ptr<Statement> handleIdentifier();
 };
 

@@ -42,6 +42,11 @@ fn add(a: int, b: int): int {
 
 Comments are preserved during formatting.
 
+The formatter uses a recovery parser for recoverable syntax issues, such as a
+missing semicolon, and reports the parser diagnostic before emitting the
+normalized source. The interpreter remains strict and will refuse to execute
+the same invalid source.
+
 The formatter also supports imports, module member calls, arrays, indexing,
 `export` and `extern` functions, `void` return types, expression statements,
 and bare `return;` statements.

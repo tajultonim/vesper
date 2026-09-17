@@ -118,7 +118,9 @@ Token Lexer::readString() {
         break;
 
       default:
-        throw std::runtime_error("Unknown escape sequence");
+        throw std::runtime_error(
+            "Unknown escape sequence at line " + std::to_string(line) +
+            ", column " + std::to_string(column));
       }
 
       advance();

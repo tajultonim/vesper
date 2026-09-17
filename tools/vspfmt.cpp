@@ -1,4 +1,5 @@
 #include "../src/lexer.hpp"
+#include "../src/errors.hpp"
 #include "../src/parser.hpp"
 #include "./formatter.hpp"
 
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     std::vector<Token> tokens = lexer.tokenize();
 
-    Parser parser(tokens);
+    Parser parser(tokens, false);
     Program program = parser.parseProgram();
 
     Formatter formatter;
@@ -60,8 +61,12 @@ int main(int argc, char *argv[]) {
     } else {
       std::cout << formatted;
     }
+  } catch (const VesperError &error) {
+    std::cerr << "\x1b[31mFormatting failed:\x1b[0m " << error.what()
+              << '\n';
+    return 1;
   } catch (const std::exception &e) {
-    std::cerr << "Formatting failed: " << e.what() << '\n';
+    std::cerr << "\x1b[31mFormatting failed:\x1b[0m " << e.what() << '\n';
     return 1;
   }
 
