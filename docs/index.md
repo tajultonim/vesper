@@ -29,6 +29,7 @@ print(result);
 
 ## Documentation
 
+- [Installation](installation.md)
 - [Getting Started](getting-started.md)
 - [Language](language/index.md)
 - [Reference](reference/index.md)

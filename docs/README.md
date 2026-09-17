@@ -8,7 +8,8 @@ The published documentation is available at
 ## Structure
 
 - `index.md` — documentation home
-- `getting-started.md` — installation and basic usage
+- `installation.md` — building, PATH setup, and editor installation
+- `getting-started.md` — basic usage and development flow
 - `language/` — language features and syntax
 - `reference/` — compact language reference
 - `tools/` — CLI and formatter
