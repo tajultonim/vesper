@@ -66,6 +66,9 @@ std::string typeToString(const Type &type) {
 
   case Type::Kind::ARRAY:
     return "[" + typeToString(*type.elementType) + "]";
+
+  case Type::Kind::VOID:
+    return "void";
   }
 
   throw std::runtime_error("Unknown type");
@@ -192,6 +195,10 @@ void Formatter::formatExpression(const Expression *expression,
   } else if (auto *identifier =
                  dynamic_cast<const IdentifierExpression *>(expression)) {
     output += identifier->name;
+  } else if (auto *member = dynamic_cast<const MemberExpression *>(expression)) {
+    formatExpression(member->object.get());
+    output += ".";
+    output += member->member;
   } else if (auto *array = dynamic_cast<const ArrayExpression *>(expression)) {
     output += "[";
 
@@ -285,6 +292,23 @@ void Formatter::formatStatement(const Statement *statement) {
     output += ";\n";
   }
 
+  else if (auto *expressionStatement =
+               dynamic_cast<const ExpressionStatement *>(statement)) {
+    writeIndent();
+    formatExpression(expressionStatement->expression.get());
+    output += ";\n";
+  }
+
+  else if (auto *importStatement =
+               dynamic_cast<const ImportStatement *>(statement)) {
+    writeIndent();
+    output += "import \"";
+    output += escapeString(importStatement->path);
+    output += "\" as ";
+    output += importStatement->alias;
+    output += ";\n";
+  }
+
  
   else if (auto *ifStatement = dynamic_cast<const IfStatement *>(statement)) {
     writeIndent();
@@ -326,6 +350,14 @@ void Formatter::formatStatement(const Statement *statement) {
                dynamic_cast<const FunctionStatement *>(statement)) {
     writeIndent();
 
+    if (function->isExport) {
+      output += "export ";
+    }
+
+    if (function->isExtern) {
+      output += "extern ";
+    }
+
     output += "fn ";
     output += function->name;
     output += "(";
@@ -349,6 +381,12 @@ void Formatter::formatStatement(const Statement *statement) {
 
     output += "): ";
     output += typeToString(function->returnType);
+
+    if (function->isExtern) {
+      output += ";\n";
+      return;
+    }
+
     output += " {\n";
 
     indentLevel++;
@@ -366,9 +404,12 @@ void Formatter::formatStatement(const Statement *statement) {
                dynamic_cast<const ReturnStatement *>(statement)) {
     writeIndent();
 
-    output += "return ";
+    output += "return";
 
-    formatExpression(returnStatement->value.get());
+    if (returnStatement->value) {
+      output += " ";
+      formatExpression(returnStatement->value.get());
+    }
 
     output += ";\n";
   }
