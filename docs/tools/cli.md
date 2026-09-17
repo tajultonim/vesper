@@ -13,6 +13,41 @@ The Vesper executable is invoked with a `.vsp` source file.
 vesper <file.vsp>
 ```
 
+## Verbose diagnostics
+
+Use `--verbose` or `-V` to print lexer, parser, module-loading, name-resolution,
+type-checking, and execution diagnostics to standard error. Verbose mode does
+not print the full token list.
+
+```text
+vesper --verbose program.vsp
+vesper -V program.vsp
+```
+
+## Token dump
+
+Use `--tokens` to print the complete token list to standard output:
+
+```text
+vesper program.vsp --tokens
+```
+
+Provide a path after `--tokens` to write the token list to a file:
+
+```text
+vesper --tokens tokens.txt program.vsp
+vesper --verbose --tokens=tokens.txt program.vsp
+```
+
+The token file contains each token's type, source value, line, and column.
+
+The program's normal output remains on standard output, so verbose diagnostics
+can be redirected separately:
+
+```text
+vesper --verbose program.vsp > output.txt 2> debug.log
+```
+
 ## Help
 
 ```text

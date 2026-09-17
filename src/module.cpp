@@ -1,6 +1,7 @@
 #include "module.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -8,8 +9,8 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 
-ModuleLoader::ModuleLoader(std::filesystem::path rootDirectory)
-    : rootDirectory(std::move(rootDirectory)) {}
+ModuleLoader::ModuleLoader(std::filesystem::path rootDirectory, bool verbose)
+  : rootDirectory(std::move(rootDirectory)), verbose(verbose) {}
 
 std::shared_ptr<Module> ModuleLoader::load(const std::string &path) {
   return loadRecursive(path, rootDirectory);
@@ -22,6 +23,11 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(
       resolvePath(path, importingDirectory);
   const std::string cacheKey = filePath.generic_string();
 
+  if (verbose) {
+    std::cerr << "[verbose] module request: " << path << " -> "
+              << filePath.string() << '\n';
+  }
+
   if (loading.find(cacheKey) != loading.end()) {
     throw std::runtime_error(
         "MODULE_ERROR: Circular module dependency involving '" + path + "'");
@@ -30,6 +36,9 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(
   auto loaded = modules.find(cacheKey);
 
   if (loaded != modules.end()) {
+    if (verbose) {
+      std::cerr << "[verbose] module cache hit: " << filePath.string() << '\n';
+    }
     return loaded->second;
   }
 
@@ -62,6 +71,10 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(
 
   Parser parser(tokens);
   Program program = parser.parseProgram();
+
+  if (verbose) {
+    std::cerr << "[verbose] parsed module: " << filePath.string() << '\n';
+  }
 
   auto module = std::make_shared<Module>(path, std::move(program));
   modules.insert_or_assign(cacheKey, module);

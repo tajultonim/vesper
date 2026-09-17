@@ -110,14 +110,20 @@ std::string tokenTypeName(TokenType type) {
   return "unknown";
 }
 
-void printToken(const Token &token) {
-  std::cout << std::left << std::setw(25)
+void writeToken(std::ostream &output, const Token &token) {
+  output << std::left << std::setw(25)
             << tokenTypeName(token.type) + "('" + token.value + "')"
             << token.line << ":" << token.column << '\n';
 }
 
+void printToken(const Token &token) { writeToken(std::cerr, token); }
+
 void printTokens(const std::vector<Token> &tokens) {
+  writeTokens(std::cerr, tokens);
+}
+
+void writeTokens(std::ostream &output, const std::vector<Token> &tokens) {
   for (const auto &token : tokens) {
-    printToken(token);
+    writeToken(output, token);
   }
 }

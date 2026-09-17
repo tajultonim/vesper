@@ -74,3 +74,4 @@ struct Token {
 std::string tokenTypeName(TokenType type);
 void printToken(const Token &token);
 void printTokens(const std::vector<Token> &tokens);
+void writeTokens(std::ostream &output, const std::vector<Token> &tokens);

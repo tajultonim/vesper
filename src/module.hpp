@@ -25,7 +25,8 @@ struct Module {
 
 class ModuleLoader {
 public:
-  explicit ModuleLoader(std::filesystem::path rootDirectory);
+  explicit ModuleLoader(std::filesystem::path rootDirectory,
+                        bool verbose = false);
 
   std::shared_ptr<Module> load(const std::string &path);
 
@@ -39,6 +40,7 @@ private:
       const std::filesystem::path &importingDirectory) const;
 
   std::filesystem::path rootDirectory;
+  bool verbose;
 
   // Modules that have already been completely loaded.
   std::unordered_map<std::string, std::shared_ptr<Module>> modules;
