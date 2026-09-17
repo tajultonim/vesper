@@ -11,6 +11,7 @@
 struct Module {
   std::string path;
   Program program;
+  std::unordered_map<std::string, std::shared_ptr<Module>> imports;
 
   Module() = default;
   Module(std::string path, Program program)
@@ -29,7 +30,13 @@ public:
   std::shared_ptr<Module> load(const std::string &path);
 
 private:
-  std::shared_ptr<Module> loadRecursive(const std::string &path);
+  std::shared_ptr<Module> loadRecursive(
+      const std::string &path,
+      const std::filesystem::path &importingDirectory);
+
+  std::filesystem::path resolvePath(
+      const std::string &path,
+      const std::filesystem::path &importingDirectory) const;
 
   std::filesystem::path rootDirectory;
 

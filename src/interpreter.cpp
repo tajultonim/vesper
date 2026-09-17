@@ -554,6 +554,10 @@ void Interpreter::registerModule(
     importedFunctions[alias + "." + function->name] =
         runtimeFunction;
   }
+
+  for (const auto &import : module->imports) {
+    registerModule(import.first, import.second);
+  }
 }
 
 //*****************************************
