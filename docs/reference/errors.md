@@ -9,6 +9,22 @@ nav_order: 4
 
 Vesper reports errors from several stages of execution.
 
+The implementation uses typed errors derived from `VesperError`:
+
+| Error type | Stage |
+|---|---|
+| `CliError` | command-line arguments and file I/O |
+| `LexerError` | source tokenization |
+| `ParserError` | AST construction |
+| `ModuleError` | module resolution, loading, and cycles |
+| `ResolverError` | name and scope resolution |
+| `TypeError` | static type checking |
+| `RuntimeError` | interpretation and evaluation |
+
+The CLI catches these errors at the pipeline boundary and reports the phase,
+source file, and any line/column information already available in the
+diagnostic.
+
 ## Lexical errors
 
 These occur when the lexer cannot recognize source text.
@@ -55,5 +71,7 @@ Vesper tracks source line and column information for tokens and statements. This
 As the compiler matures, error messages should consistently follow:
 
 ```text
-file:line:column: error: message
+[PHASE] file:line:column: error: message
 ```
+
+For pipeline diagnostics, run the interpreter with `--verbose` or `-V`.

@@ -4,6 +4,7 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 #include <iostream>
 #include <sstream>
 
+#include "errors.hpp"
 #include "interpreter.hpp"
 #include "lexer.hpp"
 #include "module.hpp"
@@ -16,10 +17,8 @@ int main(int argc, char *argv[]) {
 
   try {
     if (argc < 2) {
-      std::cerr << "Usage: vesper [--verbose|-V] [--tokens <file>] <file.vsp>\n"
-                << "       vesper --help\n"
-                << "       vesper --version\n";
-      return 1;
+      throw CliError(
+          "Usage: vesper [--verbose|-V] [--tokens <file>] <file.vsp>");
     }
 
     bool verbose = false;
@@ -42,22 +41,19 @@ int main(int argc, char *argv[]) {
       } else if (option.rfind("--tokens=", 0) == 0) {
         tokenOutputPath = option.substr(9);
         if (tokenOutputPath.empty()) {
-          std::cerr << "--tokens requires an output file.\n";
-          return 1;
+          throw CliError("--tokens requires an output file.");
         }
 
         writeTokensToFile = true;
       } else if (argument.empty()) {
         argument = std::move(option);
       } else {
-        std::cerr << "Unexpected argument: " << option << '\n';
-        return 1;
+        throw CliError("Unexpected argument: " + option);
       }
     }
 
     if (argument.empty()) {
-      std::cerr << "A source file is required.\n";
-      return 1;
+      throw CliError("A source file is required.");
     }
 
     if (argument == "--help" || argument == "-h") {
@@ -82,13 +78,11 @@ int main(int argc, char *argv[]) {
     }
 
     std::filesystem::path sourcePath = argument;
-    std::filesystem::path rootPath = sourcePath.parent_path();
 
     std::ifstream file(sourcePath);
 
     if (!file) {
-      std::cerr << "Could not open file: " << argument << '\n';
-      return 1;
+      throw CliError("Could not open file: " + argument);
     }
 
     std::stringstream buffer;
@@ -96,8 +90,15 @@ int main(int argc, char *argv[]) {
 
     std::string source = buffer.str();
 
-    Lexer lexer(source);
-    auto tokens = lexer.tokenize();
+    std::vector<Token> tokens;
+    try {
+      Lexer lexer(source);
+      tokens = lexer.tokenize();
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<LexerError>(error, sourcePath.string());
+    }
 
     if (verbose) {
       std::cerr << "[verbose] lexed " << tokens.size() << " tokens\n";
@@ -108,17 +109,15 @@ int main(int argc, char *argv[]) {
     } else if (writeTokensToFile) {
       std::ofstream tokenFile(tokenOutputPath);
       if (!tokenFile) {
-        std::cerr << "Could not write token file: " << tokenOutputPath.string()
-                  << '\n';
-        return 1;
+        throw CliError("Could not write token file: " +
+                       tokenOutputPath.string());
       }
 
       writeTokens(tokenFile, tokens);
 
       if (!tokenFile) {
-        std::cerr << "Failed to write token file: "
-                  << tokenOutputPath.string() << '\n';
-        return 1;
+        throw CliError("Failed to write token file: " +
+                       tokenOutputPath.string());
       }
 
       if (verbose) {
@@ -127,41 +126,74 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    Parser parser(tokens);
-
-    Program program = parser.parseProgram();
+    Program program;
+    try {
+      Parser parser(tokens);
+      program = parser.parseProgram();
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<ParserError>(error, sourcePath.string());
+    }
     if (verbose) {
       std::cerr << "[verbose] parsed entry program\n";
     }
 
     ModuleLoader loader(sourcePath.parent_path(), verbose);
     Interpreter interpreter;
-    for (const auto &statement : program.statements) {
-      if (const auto *import =
-              dynamic_cast<const ImportStatement *>(statement.get())) {
-        auto module = loader.load(import->path);
-        interpreter.registerModule(import->alias, module);
+    try {
+      for (const auto &statement : program.statements) {
+        if (const auto *import =
+                dynamic_cast<const ImportStatement *>(statement.get())) {
+          auto module = loader.load(import->path);
+          interpreter.registerModule(import->alias, module);
+        }
       }
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<ModuleError>(error, sourcePath.string());
     }
 
     Resolver resolver;
-    resolver.resolveProgram(program);
+    try {
+      resolver.resolveProgram(program);
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<ResolverError>(error, sourcePath.string());
+    }
     if (verbose) {
       std::cerr << "[verbose] resolved names\n";
     }
 
     TypeChecker checker;
-    checker.checkProgram(program);
+    try {
+      checker.checkProgram(program);
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<TypeError>(error, sourcePath.string());
+    }
     if (verbose) {
       std::cerr << "[verbose] type checking passed\n";
     }
 
-    interpreter.execute(program);
+    try {
+      interpreter.execute(program);
+    } catch (const VesperError &) {
+      throw;
+    } catch (const std::exception &error) {
+      rethrowWithSource<RuntimeError>(error, sourcePath.string());
+    }
     if (verbose) {
       std::cerr << "[verbose] execution finished\n";
     }
 
     return 0;
+  } catch (const VesperError &error) {
+    std::cerr << "ERROR: " << error.what() << '\n';
+    return 1;
   } catch (const std::exception &e) {
     std::cerr << "ERROR: " << e.what() << '\n';
     return 1;

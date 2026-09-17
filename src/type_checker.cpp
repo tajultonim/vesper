@@ -368,7 +368,10 @@ void TypeChecker::checkDeclaration(const VariableDeclaration *declaration) {
 
     if (!compatible) {
       throw std::runtime_error("TYPE_ERROR: Initializer type does not match "
-                               "declared variable type");
+                               "declared variable type at line " +
+                               std::to_string(declaration->line) +
+                               ", column " +
+                               std::to_string(declaration->column));
     }
   }
 
@@ -385,13 +388,16 @@ void TypeChecker::checkAssignment(const AssignmentStatement *assignment) {
 
   if (it == types.end()) {
     throw std::runtime_error("TYPE_ERROR: Undefined variable '" +
-                             assignment->name + "'");
+                             assignment->name + "' at line " +
+                             std::to_string(assignment->line) + ", column " +
+                             std::to_string(assignment->column));
   }
 
   if (!it->second.mutable_) {
     throw std::runtime_error(
         "TYPE_ERROR: Cannot assign to immutable variable '" + assignment->name +
-        "'");
+        "' at line " + std::to_string(assignment->line) + ", column " +
+        std::to_string(assignment->column));
   }
 
   Type valueType = checkExpression(assignment->value.get());
@@ -400,7 +406,10 @@ void TypeChecker::checkAssignment(const AssignmentStatement *assignment) {
                     (isNumeric(it->second.type) && isNumeric(valueType));
 
   if (!compatible) {
-    throw std::runtime_error("TYPE_ERROR: Assigned value has incorrect type");
+    throw std::runtime_error("TYPE_ERROR: Assigned value has incorrect type "
+                             "at line " + std::to_string(assignment->line) +
+                             ", column " +
+                             std::to_string(assignment->column));
   }
 }
 
@@ -408,7 +417,10 @@ void TypeChecker::checkIfStatement(const IfStatement *ifStatement) {
   Type conditionType = checkExpression(ifStatement->condition.get());
 
   if (conditionType.kind != Type::Kind::BOOL) {
-    throw std::runtime_error("TYPE_ERROR: If condition must be boolean");
+    throw std::runtime_error("TYPE_ERROR: If condition must be boolean at line " +
+                             std::to_string(ifStatement->line) +
+                             ", column " +
+                             std::to_string(ifStatement->column));
   }
 
   for (const auto &statement : ifStatement->thenBranch) {
@@ -424,7 +436,10 @@ void TypeChecker::checkWhileStatement(const WhileStatement *whileStatement) {
   Type conditionType = checkExpression(whileStatement->condition.get());
 
   if (conditionType.kind != Type::Kind::BOOL) {
-    throw std::runtime_error("TYPE_ERROR: While condition must be boolean");
+    throw std::runtime_error(
+        "TYPE_ERROR: While condition must be boolean at line " +
+        std::to_string(whileStatement->line) + ", column " +
+        std::to_string(whileStatement->column));
   }
 
   for (const auto &statement : whileStatement->body) {
@@ -473,7 +488,9 @@ void TypeChecker::checkFunction(const FunctionStatement *function) {
 void TypeChecker::checkReturn(const ReturnStatement *returnStatement) {
   if (currentFunctionReturnType == nullptr) {
     throw std::runtime_error(
-        "TYPE_ERROR: Return statement outside of a function");
+      "TYPE_ERROR: Return statement outside of a function at line " +
+      std::to_string(returnStatement->line) + ", column " +
+      std::to_string(returnStatement->column));
   }
 
   Type returnType = checkExpression(returnStatement->value.get());
@@ -484,7 +501,10 @@ void TypeChecker::checkReturn(const ReturnStatement *returnStatement) {
 
   if (!compatible) {
     throw std::runtime_error("TYPE_ERROR: Return type does not match "
-                             "function return type");
+                             "function return type at line " +
+                             std::to_string(returnStatement->line) +
+                             ", column " +
+                             std::to_string(returnStatement->column));
   }
 }
 
