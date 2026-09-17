@@ -23,6 +23,12 @@ std::string valueTypeName(const Value &value) {
   if (std::holds_alternative<std::string>(value))
     return "string";
 
+  if (std::holds_alternative<std::shared_ptr<Array>>(value))
+    return "array";
+
+  if (std::holds_alternative<std::shared_ptr<Function>>(value))
+    return "function";
+
   return "Unknown";
 }
 
@@ -172,6 +178,7 @@ Value Interpreter::evaluateCall(const CallExpression *call) {
   // Create function-local environment
   // with the caller's environment as its parent.
   environment = std::make_shared<Environment>(previousEnvironment);
+  environment->define(declaration->name, Variable{function, false});
 
   try {
     // Bind parameters.
@@ -219,6 +226,10 @@ Value Interpreter::evaluateCall(const CallExpression *call) {
 // *****************************************
 
 Value Interpreter::evaluate(const Expression *expression) {
+  if (!expression) {
+    return {};
+  }
+
   if (auto *integer = dynamic_cast<const IntegerExpression *>(expression)) {
     return integer->value;
   }
@@ -228,6 +239,27 @@ Value Interpreter::evaluate(const Expression *expression) {
 
     return environment->get(identifier->name, identifier->line,
                             identifier->column);
+  }
+
+  if (auto *member = dynamic_cast<const MemberExpression *>(expression)) {
+    auto moduleIdentifier =
+        dynamic_cast<const IdentifierExpression *>(member->object.get());
+
+    if (!moduleIdentifier) {
+      throw std::runtime_error(
+          "RUNTIME ERROR: module member access requires a module alias");
+    }
+
+    const std::string qualifiedName = moduleIdentifier->name + "." +
+                                      member->member;
+    auto functionIt = importedFunctions.find(qualifiedName);
+
+    if (functionIt == importedFunctions.end()) {
+      throw std::runtime_error("RUNTIME ERROR: undefined imported function '" +
+                               qualifiedName + "'");
+    }
+
+    return functionIt->second;
   }
 
   if (auto *unary = dynamic_cast<const UnaryExpression *>(expression)) {
@@ -460,7 +492,9 @@ void Interpreter::executeStatement(const Statement *statement) {
     return;
   } else if (auto returnStatement =
                  dynamic_cast<const ReturnStatement *>(statement)) {
-    Value value = evaluate(returnStatement->value.get());
+    Value value = returnStatement->value
+              ? evaluate(returnStatement->value.get())
+              : Value{};
 
     throw ReturnException(std::move(value));
   }
@@ -487,6 +521,8 @@ void Interpreter::executeStatement(const Statement *statement) {
   } else if (const auto *expressionStatement =
                  dynamic_cast<const ExpressionStatement *>(statement)) {
     evaluate(expressionStatement->expression.get());
+  } else if (dynamic_cast<const ImportStatement *>(statement)) {
+    // Imports are registered before execution begins.
   } else {
     throw std::runtime_error("RUNTIME_ERROR: Unknown statement");
   }
@@ -499,6 +535,24 @@ void Interpreter::executeStatement(const Statement *statement) {
 void Interpreter::execute(const Program &program) {
   for (const auto &statement : program.statements) {
     executeStatement(statement.get());
+  }
+}
+
+void Interpreter::registerModule(
+    const std::string &alias, const std::shared_ptr<Module> &module) {
+  importedModules[alias] = module;
+
+  for (const auto &statement : module->program.statements) {
+    const auto *function =
+        dynamic_cast<const FunctionStatement *>(statement.get());
+    if (!function) {
+      continue;
+    }
+
+    auto runtimeFunction = std::make_shared<Function>();
+    runtimeFunction->declaration = const_cast<FunctionStatement *>(function);
+    importedFunctions[alias + "." + function->name] =
+        runtimeFunction;
   }
 }
 

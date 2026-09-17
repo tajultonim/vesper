@@ -11,18 +11,18 @@
 ModuleLoader::ModuleLoader(std::filesystem::path rootDirectory)
     : rootDirectory(std::move(rootDirectory)) {}
 
-Module ModuleLoader::load(const std::string &path) {
+std::shared_ptr<Module> ModuleLoader::load(const std::string &path) {
   return loadRecursive(path);
 }
 
-Module ModuleLoader::loadRecursive(const std::string &path) {
+std::shared_ptr<Module> ModuleLoader::loadRecursive(const std::string &path) {
   std::cout << "MODULE_LOADER: Loading module: " << path << std::endl;
   // Already completely loaded?
   auto loaded = modules.find(path);
 
   if (loaded != modules.end()) {
     std::cout << "MODULE_LOADER: Module already loaded: " << path << std::endl;
-    return std::move(loaded->second);
+    return loaded->second;
   }
 
   // Currently loading this module?
@@ -87,9 +87,8 @@ Module ModuleLoader::loadRecursive(const std::string &path) {
 
   loading.erase(path);
 
-  Module module{path, std::move(program)};
+  auto module = std::make_shared<Module>(path, std::move(program));
+  modules.insert_or_assign(path, module);
 
-  modules.insert_or_assign(path, std::move(module));
-
-  return std::move(modules.at(path));
+  return module;
 }

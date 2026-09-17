@@ -8,6 +8,7 @@ constexpr const char *VESPER_VERSION = "0.1.0";
 #include "lexer.hpp"
 #include "module.hpp"
 #include "parser.hpp"
+#include "resolver.hpp"
 #include "token.hpp"
 #include "type_checker.hpp"
 
@@ -63,22 +64,26 @@ int main(int argc, char *argv[]) {
 
     Program program = parser.parseProgram();
     ModuleLoader loader(sourcePath.parent_path());
+    Interpreter interpreter;
     for (const auto &statement : program.statements) {
       if (const auto *import =
               dynamic_cast<const ImportStatement *>(statement.get())) {
-        Module module = loader.load(import->path);
+        auto module = loader.load(import->path);
+        interpreter.registerModule(import->alias, module);
       }
     }
+
+    Resolver resolver;
+    resolver.resolveProgram(program);
 
     TypeChecker checker;
     checker.checkProgram(program);
 
-    Interpreter interpreter;
     interpreter.execute(program);
 
     return 0;
   } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << '\n';
+    std::cerr << "ERROR: " << e.what() << '\n';
     return 1;
   }
 }

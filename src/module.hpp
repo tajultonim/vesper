@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -25,15 +26,15 @@ class ModuleLoader {
 public:
   explicit ModuleLoader(std::filesystem::path rootDirectory);
 
-  Module load(const std::string &path);
+  std::shared_ptr<Module> load(const std::string &path);
 
 private:
-  Module loadRecursive(const std::string &path);
+  std::shared_ptr<Module> loadRecursive(const std::string &path);
 
   std::filesystem::path rootDirectory;
 
   // Modules that have already been completely loaded.
-  std::unordered_map<std::string, Module> modules;
+  std::unordered_map<std::string, std::shared_ptr<Module>> modules;
 
   // Modules currently being loaded.
   std::unordered_set<std::string> loading;

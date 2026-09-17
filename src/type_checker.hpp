@@ -61,6 +61,7 @@ private:
     );
 
 
+
     // Type utilities
     bool sameType(
         const Type &left,
@@ -77,6 +78,7 @@ private:
 
     // Function signatures
     std::unordered_map<std::string, FunctionInfo> functions;
+
 
     // Return type of the function currently being checked.
     // nullptr means we are not inside a function.

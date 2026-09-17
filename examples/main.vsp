@@ -1,4 +1,7 @@
-import "physics" as p;
 import "math" as m;
+import "physics" as p;
 
-m.square(5.0);
+let result = m.factorial(10);
+let energyResult = p.energy(5.0, 3);
+print(result);
+print(energyResult);
