@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
-    printTokens(tokens);
+    // printTokens(tokens);
 
     Parser parser(tokens);
 

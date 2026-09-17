@@ -16,19 +16,20 @@ std::shared_ptr<Module> ModuleLoader::load(const std::string &path) {
 }
 
 std::shared_ptr<Module> ModuleLoader::loadRecursive(const std::string &path) {
-  std::cout << "MODULE_LOADER: Loading module: " << path << std::endl;
+  // std::cout << "MODULE_LOADER: Loading module: " << path << std::endl;
   // Already completely loaded?
   auto loaded = modules.find(path);
 
   if (loaded != modules.end()) {
-    std::cout << "MODULE_LOADER: Module already loaded: " << path << std::endl;
+    // std::cout << "MODULE_LOADER: Module already loaded: " << path <<
+    // std::endl;
     return loaded->second;
   }
 
   // Currently loading this module?
   if (loading.find(path) != loading.end()) {
-    throw std::runtime_error("Circular module dependency involving '" + path +
-                             "'");
+    throw std::runtime_error(
+        "MODULE_ERROR: Circular module dependency involving '" + path + "'");
   }
 
   loading.insert(path);
@@ -40,7 +41,8 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(const std::string &path) {
   if (!file) {
     loading.erase(path);
 
-    throw std::runtime_error("Could not load module '" + path + "'");
+    throw std::runtime_error("MODULE_ERROR: Could not load module '" + path +
+                             "'");
   }
 
   std::stringstream buffer;
@@ -66,8 +68,9 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(const std::string &path) {
   // Recursively load imports
   // -------------------------
 
-  std::cout << "MODULE_LOADER: Recursively loading imports for module: " << path
-            << std::endl;
+  // std::cout << "MODULE_LOADER: Recursively loading imports for module: " <<
+  // path
+  //           << std::endl;
 
   for (const auto &statement : program.statements) {
     const auto *import = dynamic_cast<ImportStatement *>(statement.get());
@@ -78,8 +81,8 @@ std::shared_ptr<Module> ModuleLoader::loadRecursive(const std::string &path) {
     loadRecursive(import->path);
   }
 
-  std::cout << "MODULE_LOADER: Finished loading imports for module: " << path
-            << std::endl;
+  // std::cout << "MODULE_LOADER: Finished loading imports for module: " << path
+  // << std::endl;
 
   // -------------------------
   // Finished loading
