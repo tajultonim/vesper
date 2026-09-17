@@ -42,6 +42,10 @@ fn add(a: int, b: int): int {
 
 Comments are preserved during formatting.
 
+The formatter also supports imports, module member calls, arrays, indexing,
+`export` and `extern` functions, `void` return types, expression statements,
+and bare `return;` statements.
+
 ## Development note
 
 The formatter operates on the parsed AST while using the original token stream to preserve comments that are not represented in the AST.

@@ -35,8 +35,19 @@ type ::= "int"
        | "float"
        | "bool"
        | "string"
+             | "void"
        | "[" type "]"
 ```
+
+## Imports
+
+```text
+import_statement ::= "import" string "as" identifier ";"
+```
+
+An import is resolved relative to the file that contains it. The `.vsp`
+extension is optional, and `math` and `./math` both resolve to a sibling
+`math.vsp` when written inside the same directory.
 
 ## If statement
 
@@ -60,11 +71,8 @@ while_statement ::= "while" "(" expression ")" "{"
 ## Function
 
 ```text
-function ::= "fn" identifier "(" parameter_list? ")"
-             ":" type
-             "{"
-                 statement*
-             "}"
+function ::= ("export")? ("extern")? "fn" identifier "(" parameter_list? ")"
+             ":" type (";" | "{" statement* "}")
 
 parameter_list ::= parameter ("," parameter)*
 
@@ -75,7 +83,7 @@ parameter ::= identifier ":" type
 ## Return
 
 ```text
-return_statement ::= "return" expression ";"
+return_statement ::= "return" expression? ";"
 ```
 
 ## Expressions
@@ -123,4 +131,17 @@ call ::= expression "(" (expression ("," expression)*)? ")"
 
 ```text
 index ::= expression "[" expression "]"
+```
+
+## Member access
+
+```text
+member ::= expression "." identifier
+```
+
+Module functions can be called through an imported alias:
+
+```vesper
+import "math" as m;
+let result = m.square(5.0);
 ```

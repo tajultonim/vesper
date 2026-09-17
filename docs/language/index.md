@@ -21,3 +21,4 @@ This section describes the Vesper language syntax and features.
 8. [Functions](functions.md)
 9. [Arrays](arrays.md)
 10. [Scope](scope.md)
+11. [Modules](modules.md)

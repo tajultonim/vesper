@@ -17,6 +17,7 @@ Vesper uses static types.
 | `float` | Floating-point values |
 | `bool` | Boolean values |
 | `string` | Text values |
+| `void` | No return value |
 
 ### Integer
 

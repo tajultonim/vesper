@@ -2,6 +2,9 @@
 
 Documentation for the Vesper programming language.
 
+The published documentation is available at
+[tajultonim.github.io/vesper](https://tajultonim.github.io/vesper/).
+
 ## Structure
 
 - `index.md` — documentation home

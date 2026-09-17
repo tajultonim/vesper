@@ -79,6 +79,8 @@ vesper/
 │   ├── parser.hpp / parser.cpp
 │   ├── environment.hpp / environment.cpp
 │   ├── interpreter.hpp / interpreter.cpp
+│   ├── module.hpp / module.cpp
+│   ├── resolver.hpp / resolver.cpp
 │   ├── type.hpp
 │   └── type_checker.hpp / type_checker.cpp
 │
@@ -92,6 +94,9 @@ vesper/
 └── examples/
     └── *.vsp
 ```
+
+The module loader resolves each import relative to the importing file,
+canonicalizes the resolved path for caching, and detects circular imports.
 
 ## Why this shape?
 

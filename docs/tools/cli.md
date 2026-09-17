@@ -27,8 +27,20 @@ vesper --version
 vesper -v
 ```
 
-The current version is:
+The version is reported by the executable:
 
 ```text
-0.1.0
+vesper --version
 ```
+
+## Module paths
+
+Imports are resolved relative to the importing file. These declarations are
+equivalent when `physics.vsp` and `math.vsp` are siblings:
+
+```vesper
+import "math" as math;
+import "./math" as math;
+```
+
+The loader caches each resolved module and detects circular dependencies.

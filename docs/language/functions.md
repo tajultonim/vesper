@@ -17,6 +17,18 @@ fn add(a: int, b: int): int {
 }
 ```
 
+Functions may also be marked `export` or `extern`:
+
+```vesper
+export fn public_api(value: int): int {
+    return value;
+}
+
+extern fn native_api(value: int): int;
+```
+
+An `extern` declaration has no body and ends with a semicolon.
+
 A function declaration contains:
 
 1. `fn`
@@ -67,6 +79,13 @@ fn add(a: int, b: int): int {
 
 ```vesper
 let result = add(10, 20);
+```
+
+Imported functions are called through their module alias:
+
+```vesper
+import "math" as m;
+let result = m.square(5.0);
 ```
 
 ## Multiple arguments

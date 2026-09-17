@@ -11,3 +11,4 @@ Vesper currently includes the language executable and formatter.
 
 - [Command Line](cli.md)
 - [Formatter](formatter.md)
+- [VS Code Extension](vscode.md)

@@ -38,7 +38,7 @@ vesper --version
 vesper -v
 ```
 
-The current development version is `0.1.0`.
+The version shown by the executable is available with `vesper --version`.
 
 ## Formatter
 
@@ -58,6 +58,15 @@ vspfmt <file.vsp> -w
 
 
 The formatter is intended to produce consistent indentation, spacing, and layout while preserving comments.
+
+## VS Code extension
+
+The Vesper VS Code extension provides syntax highlighting, autocomplete,
+formatting, and a Run button for `.vsp` files. The extension does not require
+the interpreter or formatter binaries to be bundled. Configure their paths or
+make `vesper` and `vspfmt` available on `PATH`.
+
+See the [VS Code guide](tools/vscode.md) for the complete lookup order.
 
 ## Typical development flow
 

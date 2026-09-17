@@ -15,7 +15,7 @@ nav_order: 4
 | `-` | Subtraction |
 | `*` | Multiplication |
 | `/` | Division |
-| `//` | Floor division |
+| `//` | Integer division |
 | `%` | Remainder |
 | `**` | Exponentiation |
 
@@ -33,7 +33,8 @@ let g = 2 ** 8;
 
 `/` produces a floating-point result.
 
-`//` represents floor division.
+`//` produces an integer quotient using the current interpreter's integer
+division behavior.
 
 ## Comparison operators
 
