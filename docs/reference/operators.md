@@ -3,6 +3,7 @@ layout: default
 title: Operators
 parent: Reference
 nav_order: 3
+description: "Vesper operator precedence and behavior reference."
 ---
 
 # Operator Reference

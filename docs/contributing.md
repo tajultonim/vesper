@@ -2,6 +2,7 @@
 layout: default
 title: Contributing
 nav_order: 5
+description: "Learn how to build, test, document, and contribute to the Vesper programming language project."
 ---
 
 # Contributing

@@ -3,6 +3,7 @@ layout: default
 title: Tools
 nav_order: 4
 has_children: true
+description: "Use Vesper command-line, formatting, and Visual Studio Code tools."
 ---
 
 # Tools

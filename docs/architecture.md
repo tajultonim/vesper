@@ -2,6 +2,7 @@
 layout: default
 title: Architecture
 nav_order: 10
+description: "Explore Vesper's lexer, parser, AST, resolver, type checker, module loader, interpreter, and formatter architecture."
 ---
 
 ## Current pipeline

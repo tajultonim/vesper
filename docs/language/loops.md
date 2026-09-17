@@ -3,6 +3,7 @@ layout: default
 title: Loops
 parent: Language
 nav_order: 7
+description: "Write while loops and nested iteration in Vesper programs."
 ---
 
 # Loops

@@ -3,6 +3,7 @@ layout: default
 title: Variables
 parent: Language
 nav_order: 2
+description: "Declare immutable and mutable Vesper variables with type inference and optional annotations."
 ---
 
 # Variables

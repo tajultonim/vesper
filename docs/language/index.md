@@ -3,6 +3,7 @@ layout: default
 title: Language
 nav_order: 3
 has_children: true
+description: "Learn Vesper language features including variables, types, expressions, functions, control flow, arrays, scope, and modules."
 ---
 
 # Vesper Language

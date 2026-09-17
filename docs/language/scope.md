@@ -3,6 +3,7 @@ layout: default
 title: Scope
 parent: Language
 nav_order: 10
+description: "Understand lexical scope, nested environments, shadowing, and name resolution in Vesper."
 ---
 
 # Scope

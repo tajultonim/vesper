@@ -3,6 +3,7 @@ layout: default
 title: Formatter
 parent: Tools
 nav_order: 2
+description: "Format Vesper source with vspfmt while preserving comments and current language syntax."
 ---
 
 # Formatter

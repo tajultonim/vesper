@@ -2,6 +2,7 @@
 layout: default
 title: Getting Started
 nav_order: 3
+description: "Run Vesper programs, format source files, use the command-line tools, and understand the interpreter workflow."
 ---
 
 # Getting Started

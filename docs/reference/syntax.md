@@ -3,6 +3,7 @@ layout: default
 title: Syntax
 parent: Reference
 nav_order: 1
+description: "Formal reference for Vesper declarations, statements, types, expressions, imports, calls, arrays, and member access."
 ---
 
 # Syntax Reference

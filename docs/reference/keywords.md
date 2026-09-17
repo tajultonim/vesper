@@ -3,6 +3,7 @@ layout: default
 title: Keywords
 parent: Reference
 nav_order: 2
+description: "Reference list of Vesper keywords, builtins, literals, and type names."
 ---
 
 # Keywords

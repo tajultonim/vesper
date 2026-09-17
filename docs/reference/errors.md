@@ -3,6 +3,7 @@ layout: default
 title: Errors
 parent: Reference
 nav_order: 4
+description: "Understand Vesper CLI, lexer, parser, module, resolver, type-checking, and runtime errors."
 ---
 
 # Errors

@@ -3,6 +3,7 @@ layout: default
 title: Arrays
 parent: Language
 nav_order: 9
+description: "Create homogeneous Vesper arrays, nested arrays, and indexed data structures."
 ---
 
 # Arrays

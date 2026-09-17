@@ -3,6 +3,7 @@ layout: default
 title: Operators
 parent: Language
 nav_order: 4
+description: "Reference Vesper arithmetic, comparison, unary, division, remainder, and exponentiation operators."
 ---
 
 # Operators

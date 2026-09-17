@@ -3,6 +3,7 @@ layout: default
 title: Conditionals
 parent: Language
 nav_order: 6
+description: "Use if and else statements to express conditional control flow in Vesper."
 ---
 
 # Conditionals

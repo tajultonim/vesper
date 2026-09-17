@@ -3,6 +3,7 @@ layout: default
 title: VS Code Extension
 parent: Tools
 nav_order: 3
+description: "Set up the Vesper VS Code extension with syntax highlighting, autocomplete, formatting, and a Run button."
 ---
 
 # VS Code Extension

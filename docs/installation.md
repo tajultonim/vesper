@@ -2,6 +2,7 @@
 layout: default
 title: Installation
 nav_order: 2
+description: "Install Vesper from source or release binaries, configure PATH, and set up the Vesper VS Code extension."
 ---
 
 # Installation

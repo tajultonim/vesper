@@ -3,6 +3,7 @@ layout: default
 title: Command Line
 parent: Tools
 nav_order: 1
+description: "Run Vesper programs, inspect versions, enable verbose diagnostics, dump tokens, and understand module paths."
 ---
 
 # Command Line

@@ -3,6 +3,7 @@ layout: default
 title: Functions
 parent: Language
 nav_order: 8
+description: "Define, call, type, export, and recursively use functions in Vesper."
 ---
 
 # Functions

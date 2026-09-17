@@ -3,6 +3,7 @@ layout: default
 title: Types
 parent: Language
 nav_order: 3
+description: "Explore Vesper primitive, array, void, and inferred static types."
 ---
 
 # Types

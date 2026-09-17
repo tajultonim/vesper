@@ -3,6 +3,7 @@ layout: default
 title: Expressions
 parent: Language
 nav_order: 5
+description: "Learn Vesper literals, identifiers, binary expressions, function calls, indexing, and expression statements."
 ---
 
 # Expressions

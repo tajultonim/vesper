@@ -3,6 +3,7 @@ layout: default
 title: Reference
 nav_order: 3
 has_children: true
+description: "Compact reference documentation for Vesper syntax, keywords, operators, and errors."
 ---
 
 # Language Reference

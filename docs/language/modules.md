@@ -3,6 +3,7 @@ layout: default
 title: Modules
 parent: Language
 nav_order: 9
+description: "Import Vesper modules with relative paths, package nested dependencies, aliases, caching, and circular-import detection."
 ---
 
 # Modules

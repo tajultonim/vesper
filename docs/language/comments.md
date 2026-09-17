@@ -3,6 +3,7 @@ layout: default
 title: Comments
 parent: Language
 nav_order: 1
+description: "Use line comments and block comments in Vesper source code."
 ---
 
 # Comments

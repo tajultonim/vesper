@@ -1,8 +1,8 @@
 ---
 layout: default
-title: Vesper
+title: Vesper Programming Language
 nav_order: 1
-description: "Vesper programming language documentation."
+description: "Official documentation for the Vesper statically typed programming language, interpreter, modules, formatter, and developer tools."
 permalink: /
 ---
 
